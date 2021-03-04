@@ -5,12 +5,14 @@ from spacy.scorer import Scorer
 
 def evaluate(ner_model, examples):
     scorer = Scorer(ner_model)
+    gold_list = []
     for input_, annot in examples:
         doc_gold_text = ner_model.make_doc(input_)
         gold = Example.from_dict(doc_gold_text, {"entities": annot})
+        gold_list.append(gold)
         pred_value = ner_model(input_)
-        scorer.score(gold)
-    return scorer.scores
+    scores = scorer.score(gold_list)
+    return scores
 
 # example run
 
