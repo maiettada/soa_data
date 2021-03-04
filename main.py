@@ -27,3 +27,4 @@ examples = [
 
 ner_model = spacy.load('en_core_web_sm')
 results = evaluate(ner_model, examples)
+print(results)
