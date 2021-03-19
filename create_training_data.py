@@ -32,7 +32,7 @@ def create_training_data():
         TRAINING_DATA.append(training_example)
 
     print(*TRAINING_DATA, sep="\n")
-
+    return TRAINING_DATA
 
 create_training_data()
 
