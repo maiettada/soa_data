@@ -2,6 +2,7 @@ import spacy
 from spacy.training import Example
 from spacy.scorer import Scorer
 from spacy.tokens import Doc
+from spacy.tokens import Span
 from spacy.matcher import Matcher
 from spacy.lang.en import English
 
@@ -55,13 +56,18 @@ def train_nlp(TRAINING_DATA):
 
 
 def evaluate(ner_model, examples):
+    #ner_model = English()
     scorer = Scorer(ner_model)
     list = []
     for input_, annot in examples:
         doc_gold_text = ner_model.make_doc(input_)
+        span = Span(doc_gold_text, 2, 3, label="GPE") #cosa il modello linguistico riconoscerebbe
+        doc_gold_text.ents = [span]
         pred_value = ner_model(input_)
-        item = Example.from_dict(pred_value, {"entities": annot})
+        print([(ent.text, ent.label_) for ent in pred_value.ents])
+        item = Example.from_dict(doc_gold_text, {"entities": annot})
         list.append(item)
+        #list.append(item)
     scores = scorer.score(list)
     return scores
 
@@ -77,6 +83,7 @@ examples = [
 #ner_model = spacy.load(ner_model_path) # for spaCy's pretrained use 'en_core_web_sm'
 TRAINING_DATA = create_training_data()
 ner_model = train_nlp(TRAINING_DATA)
+print(ner_model.pipe_names)
 # spacy.load('en_core_web_lg')
 results = evaluate(ner_model, examples)
 print(results)
