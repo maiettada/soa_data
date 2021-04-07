@@ -59,15 +59,14 @@ def evaluate(ner_model, gold_examples):
     #ner_model = English()
     scorer = Scorer(ner_model)
     list = []
-    for input_, gold_annot in gold_examples:
+    for input_, gold_annot, span_indexes in gold_examples:
         doc_under_evaluation = ner_model.make_doc(input_)
-        span = Span(doc_under_evaluation, 2, 3, label="GPE") #cosa il modello linguistico riconoscerebbe
+        span = Span(doc_under_evaluation, span_indexes[0], span_indexes[1], label="GPE") #cosa il modello linguistico riconoscerebbe
         doc_under_evaluation.ents = [span]
         pred_value = ner_model(input_)
         print([(ent.text, ent.label_) for ent in pred_value.ents])
         item = Example.from_dict(doc_under_evaluation, {"entities": gold_annot})
         list.append(item)
-        #list.append(item)
     scores = scorer.score(list)
     return scores
 
@@ -75,11 +74,11 @@ def evaluate(ner_model, gold_examples):
 
 gold_data = [
     ('I like Europe.',
-     [(7, 13, 'GPE')]),
+     [(7, 13, 'GPE')],(2, 3)),
     ('I like Europe and Africa.',
-     [(7, 13, 'GPE'), (18, 24, 'GPE')]),
+     [(7, 13, 'GPE'), (18, 24, 'GPE')],(2, 3)),
     ('I like Europe and Africa and Japan.',
-     [(7, 13, 'GPE'), (18, 24, 'GPE'),(29,34, 'GPE')])
+     [(7, 13, 'GPE'), (18, 24, 'GPE'),(29,34, 'GPE')],(2, 3))
 ]
 
 #ner_model = spacy.load(ner_model_path) # for spaCy's pretrained use 'en_core_web_sm'
