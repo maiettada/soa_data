@@ -55,17 +55,17 @@ def train_nlp(TRAINING_DATA):
     return nlp
 
 
-def evaluate(ner_model, examples):
+def evaluate(ner_model, gold_examples):
     #ner_model = English()
     scorer = Scorer(ner_model)
     list = []
-    for input_, annot in examples:
-        doc_gold_text = ner_model.make_doc(input_)
-        span = Span(doc_gold_text, 2, 3, label="GPE") #cosa il modello linguistico riconoscerebbe
-        doc_gold_text.ents = [span]
+    for input_, gold_annot in gold_examples:
+        doc_under_evaluation = ner_model.make_doc(input_)
+        span = Span(doc_under_evaluation, 2, 3, label="GPE") #cosa il modello linguistico riconoscerebbe
+        doc_under_evaluation.ents = [span]
         pred_value = ner_model(input_)
         print([(ent.text, ent.label_) for ent in pred_value.ents])
-        item = Example.from_dict(doc_gold_text, {"entities": annot})
+        item = Example.from_dict(doc_under_evaluation, {"entities": gold_annot})
         list.append(item)
         #list.append(item)
     scores = scorer.score(list)
@@ -73,11 +73,13 @@ def evaluate(ner_model, examples):
 
 # example run
 
-examples = [
+gold_data = [
     ('I like Europe.',
      [(7, 13, 'GPE')]),
     ('I like Europe and Africa.',
-     [(7, 13, 'GPE'), (18, 24, 'GPE')])
+     [(7, 13, 'GPE'), (18, 24, 'GPE')]),
+    ('I like Europe and Africa and Japan.',
+     [(7, 13, 'GPE'), (18, 24, 'GPE'),(29,34, 'GPE')])
 ]
 
 #ner_model = spacy.load(ner_model_path) # for spaCy's pretrained use 'en_core_web_sm'
@@ -85,5 +87,5 @@ TRAINING_DATA = create_training_data()
 ner_model = train_nlp(TRAINING_DATA)
 print(ner_model.pipe_names)
 # spacy.load('en_core_web_lg')
-results = evaluate(ner_model, examples)
+results = evaluate(ner_model, gold_data)
 print(results)
