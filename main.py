@@ -55,13 +55,17 @@ def train_nlp(TRAINING_DATA):
     return nlp
 
 
-def evaluate(ner_model, gold_examples):
+def evaluate(ner_model, gold_examples, labelled_span):
     #ner_model = English()
     scorer = Scorer(ner_model)
     list = []
-    for input_, gold_annot, span_indexes in gold_examples:
+    i = 0
+    for input_, gold_annot in gold_examples:
+        label = labelled_span[i][0] # [0] just for vector data unboxing, beeing vector like it follows [(data)]
+        if i<len(labelled_span):
+            i = i+1
         doc_under_evaluation = ner_model.make_doc(input_)
-        span = Span(doc_under_evaluation, span_indexes[0], span_indexes[1], label="GPE") #cosa il modello linguistico riconoscerebbe
+        span = Span(doc_under_evaluation, label[0], label[1], label="GPE") #cosa il modello linguistico riconoscerebbe
         doc_under_evaluation.ents = [span]
         pred_value = ner_model(input_)
         print([(ent.text, ent.label_) for ent in pred_value.ents])
@@ -74,17 +78,22 @@ def evaluate(ner_model, gold_examples):
 
 gold_data = [
     ('I like Europe.',
-     [(7, 13, 'GPE')],(2, 3)),
+     [(7, 13, 'GPE')]),
     ('I like Europe and Africa.',
-     [(7, 13, 'GPE'), (18, 24, 'GPE')],(2, 3)),
+     [(7, 13, 'GPE'), (18, 24, 'GPE')]),
     ('I like Europe and Africa and Japan.',
-     [(7, 13, 'GPE'), (18, 24, 'GPE'),(29,34, 'GPE')],(2, 3))
+     [(7, 13, 'GPE'), (18, 24, 'GPE'),(29,34, 'GPE')])
 ]
 
+labelled_data = [
+    [(2, 3)],
+    [(2, 3)],
+    [(2, 3)]
+]
 #ner_model = spacy.load(ner_model_path) # for spaCy's pretrained use 'en_core_web_sm'
 TRAINING_DATA = create_training_data()
 ner_model = train_nlp(TRAINING_DATA)
 print(ner_model.pipe_names)
 # spacy.load('en_core_web_lg')
-results = evaluate(ner_model, gold_data)
+results = evaluate(ner_model, gold_data, labelled_data)
 print(results)
