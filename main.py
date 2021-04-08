@@ -61,12 +61,12 @@ def evaluate(ner_model, gold_examples, labelled_span):
     list = []
     i = 0
     for input_, gold_annot in gold_examples:
-        label = labelled_span[i][0] # [0] just for vector data unboxing, beeing vector like it follows [(data)]
+        label_list = labelled_span[i]
         if i<len(labelled_span):
             i = i+1
         doc_under_evaluation = ner_model.make_doc(input_)
-        span = Span(doc_under_evaluation, label[0], label[1], label="GPE") #cosa il modello linguistico riconoscerebbe
-        doc_under_evaluation.ents = [span]
+        spans = [ doc_under_evaluation.char_span(label[0], label[1], label="GPE") for label in label_list]
+        doc_under_evaluation.ents = spans
         pred_value = ner_model(input_)
         print([(ent.text, ent.label_) for ent in pred_value.ents])
         item = Example.from_dict(doc_under_evaluation, {"entities": gold_annot})
@@ -86,9 +86,9 @@ gold_data = [
 ]
 
 labelled_data = [
-    [(2, 3)],
-    [(2, 3)],
-    [(2, 3)]
+    [(7, 13)],
+    [(7, 13),(18,24)],
+    [(7, 13),(18,24)]
 ]
 #ner_model = spacy.load(ner_model_path) # for spaCy's pretrained use 'en_core_web_sm'
 TRAINING_DATA = create_training_data()
