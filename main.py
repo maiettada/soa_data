@@ -18,7 +18,7 @@ def evaluate(ner_model, gold_examples, labelled_span):
         if i<len(labelled_span):
             i = i+1
         doc_under_evaluation = ner_model.make_doc(input_)
-        spans = [ doc_under_evaluation.char_span(label[0], label[1], label="GPE") for label in label_list]
+        spans = [ doc_under_evaluation.char_span(label[0], label[1], label[2]) for label in label_list]
         doc_under_evaluation.ents = spans
         pred_value = ner_model(input_)
         print([(ent.text, ent.label_) for ent in pred_value.ents])
@@ -39,9 +39,9 @@ gold_data = [
 ]
 
 labelled_data = [
-    [(7, 13)], #changes #changes #changes
-    [(7, 13),(18,24)],
-    [(7, 13),(18,24)]
+    [(7, 13, 'GPE')],
+    [(7, 13, 'GPE'),(18,24, 'GPE')],
+    [(7, 13, 'GPE'),(18,24, 'GPE')]
 ]
 
 ner_model = init_nlp()
