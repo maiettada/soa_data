@@ -9,20 +9,20 @@ def init_nlp():
     return nlp
 
 
-def evaluate(ner_model, gold_examples, labelled_span):
+def evaluate(ner_model, gold_annotations, labelled_data_list):
     scorer = Scorer(ner_model)
     list = []
     i = 0
-    for input_, gold_annot in gold_examples:
-        label_list = labelled_span[i]
-        if i<len(labelled_span):
+    for input_textunit_, gold_annot in gold_annotations:
+        label_list_i = labelled_data_list[i]
+        if i<len(labelled_data_list):
             i = i+1
-        doc_under_evaluation = ner_model.make_doc(input_)
-        spans = [ doc_under_evaluation.char_span(label[0], label[1], label[2]) for label in label_list]
-        doc_under_evaluation.ents = spans
-        pred_value = ner_model(input_)
+        labelled_ner_textunit = ner_model.make_doc(input_textunit_)
+        spans = [ labelled_ner_textunit.char_span(label[0], label[1], label[2]) for label in label_list_i]
+        labelled_ner_textunit.ents = spans
+        pred_value = ner_model(input_textunit_)
         print([(ent.text, ent.label_) for ent in pred_value.ents])
-        item = Example.from_dict(doc_under_evaluation, {"entities": gold_annot})
+        item = Example.from_dict(labelled_ner_textunit, {"entities": gold_annot})
         list.append(item)
     scores = scorer.score(list)
     return scores
