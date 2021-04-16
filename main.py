@@ -20,8 +20,6 @@ def evaluate(ner_model, gold_annotations, labelled_data_list):
         labelled_ner_textunit = ner_model.make_doc(input_textunit_)
         spans = [ labelled_ner_textunit.char_span(label[0], label[1], label[2]) for label in label_list_i]
         labelled_ner_textunit.ents = spans
-        pred_value = ner_model(input_textunit_)
-        print([(ent.text, ent.label_) for ent in pred_value.ents])
         item = Example.from_dict(labelled_ner_textunit, {"entities": gold_annot})
         list.append(item)
     scores = scorer.score(list)
