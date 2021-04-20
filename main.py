@@ -28,17 +28,17 @@ def evaluate(ner_model, gold_annotations, labelled_data_list):
 # example run
 
 gold_data = [
-    ('I like Europe.',
-     [(7, 13, 'GPE')]),
-    ('I like Europe and Africa.',
-     [(7, 13, 'GPE'), (18, 24, 'GPE')]),
-    ('I like Europe and Africa and Japan.',
-     [(7, 13, 'GPE'), (18, 24, 'GPE'),(29,34, 'GPE')])
+    ['I like Europe and ice-creams.',
+     [(7, 13, 'GPE'),(18,28,'food')]],
+    ['I like Europe and Africa and chocolate.',
+     [(7, 13, 'GPE'), (18, 24, 'GPE'),(29,38,'food')]],
+    ['I like Europe and Africa and Japan.',
+     [(7, 13, 'GPE'), (18, 24, 'GPE'), (29, 34, 'GPE')]]
 ]
 
 labelled_data = [
     [(7, 13, 'GPE')],
-    [(7, 13, 'GPE'),(18,24, 'GPE')],
+    [(7, 13, 'GPE'),(18,24, 'GPE'),(29,38,'food')],
     [(7, 13, 'GPE'),(18,24, 'GPE')]
 ]
 
