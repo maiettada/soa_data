@@ -42,7 +42,14 @@ labelled_data = [
     [(7, 13, 'GPE'),(18,24, 'GPE')]
 ]
 
+
 ner_model = init_nlp()
+doc1 = ner_model("Hello world")
+import pickle
+with open('entry.pickle', 'wb') as f:
+    pickle.dump(doc1, f)
+doc1_data = pickle.dumps(doc1)
+print(doc1_data)
 print(ner_model.pipe_names)
 results = evaluate(ner_model, gold_data, labelled_data)
 print(results)
