@@ -44,12 +44,17 @@ labelled_data = [
 
 
 ner_model = init_nlp()
-doc1 = ner_model("Hello world")
 import pickle
-with open('entry.pickle', 'wb') as f:
-    pickle.dump(doc1, f)
-doc1_data = pickle.dumps(doc1)
-print(doc1_data)
+with open('gold.pickle', 'wb') as f:
+    pickle.dump(gold_data, f)
+with open('labelled.pickle', 'wb') as f:
+    pickle.dump(labelled_data, f)
+with open('gold.pickle', 'rb') as f:
+    loaded_gold_data = pickle.load(f)
+    print(loaded_gold_data)
+with open('labelled.pickle', 'rb') as f:
+    loaded_labelled_data = pickle.load(f)
+    print(loaded_labelled_data)
 print(ner_model.pipe_names)
 results = evaluate(ner_model, gold_data, labelled_data)
 print(results)
