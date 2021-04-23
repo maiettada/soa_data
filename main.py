@@ -1,6 +1,26 @@
 import spacy
 from spacy.training import Example
 from spacy.scorer import Scorer
+import pickle
+
+def produce_annotation_files():
+    gold_data = [
+    ['I like Europe and ice-creams.',
+     [(7, 13, 'GPE'),(18,28,'food')]],
+    ['I like Europe and Africa and chocolate.',
+     [(7, 13, 'GPE'), (18, 24, 'GPE'),(29,38,'food')]],
+    ['I like Europe and Africa and Japan.',
+     [(7, 13, 'GPE'), (18, 24, 'GPE'), (29, 34, 'GPE')]]
+    ]
+    labelled_data = [
+    [(7, 13, 'GPE')],
+    [(7, 13, 'GPE'),(18,24, 'GPE'),(29,38,'food')],
+    [(7, 13, 'GPE'),(18,24, 'GPE')]
+    ]
+    with open('gold.pickle', 'wb') as f:
+        pickle.dump(gold_data, f)
+    with open('labelled.pickle', 'wb') as f:
+        pickle.dump(labelled_data, f)
 
 def init_nlp():
     nlp = spacy.blank("en")
@@ -25,30 +45,9 @@ def evaluate(ner_model, gold_annotations, labelled_data_list):
     scores = scorer.score(list)
     return scores
 
-# example run
 
-gold_data = [
-    ['I like Europe and ice-creams.',
-     [(7, 13, 'GPE'),(18,28,'food')]],
-    ['I like Europe and Africa and chocolate.',
-     [(7, 13, 'GPE'), (18, 24, 'GPE'),(29,38,'food')]],
-    ['I like Europe and Africa and Japan.',
-     [(7, 13, 'GPE'), (18, 24, 'GPE'), (29, 34, 'GPE')]]
-]
-
-labelled_data = [
-    [(7, 13, 'GPE')],
-    [(7, 13, 'GPE'),(18,24, 'GPE'),(29,38,'food')],
-    [(7, 13, 'GPE'),(18,24, 'GPE')]
-]
-
-
+#produce_annotation_files() #used once to produce external files
 ner_model = init_nlp()
-import pickle
-with open('gold.pickle', 'wb') as f:
-    pickle.dump(gold_data, f)
-with open('labelled.pickle', 'wb') as f:
-    pickle.dump(labelled_data, f)
 with open('gold.pickle', 'rb') as f:
     loaded_gold_data = pickle.load(f)
     print(loaded_gold_data)
@@ -56,5 +55,5 @@ with open('labelled.pickle', 'rb') as f:
     loaded_labelled_data = pickle.load(f)
     print(loaded_labelled_data)
 print(ner_model.pipe_names)
-results = evaluate(ner_model, gold_data, labelled_data)
+results = evaluate(ner_model, loaded_gold_data, loaded_labelled_data)
 print(results)
