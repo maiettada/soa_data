@@ -1,6 +1,26 @@
 import spacy
 from spacy.training import Example
 from spacy.scorer import Scorer
+import pickle
+
+def produce_annotation_files():
+    gold_data = [
+    ['I like Europe and ice-creams.',
+     [(7, 13, 'GPE'),(18,28,'food')]],
+    ['I like Europe and Africa and chocolate.',
+     [(7, 13, 'GPE'), (18, 24, 'GPE'),(29,38,'food')]],
+    ['I like Europe and Africa and Japan.',
+     [(7, 13, 'GPE'), (18, 24, 'GPE'), (29, 34, 'GPE')]]
+    ]
+    labelled_data = [
+    [(7, 13, 'GPE')],
+    [(7, 13, 'GPE'),(18,24, 'GPE'),(29,38,'food')],
+    [(7, 13, 'GPE'),(18,24, 'GPE')]
+    ]
+    with open('gold.pickle', 'wb') as f:
+        pickle.dump(gold_data, f)
+    with open('labelled.pickle', 'wb') as f:
+        pickle.dump(labelled_data, f)
 
 def init_nlp():
     nlp = spacy.blank("en")
@@ -9,42 +29,31 @@ def init_nlp():
     return nlp
 
 
-def evaluate(ner_model, gold_examples, labelled_span):
+def evaluate(ner_model, gold_annotations, labelled_data_list):
     scorer = Scorer(ner_model)
     list = []
     i = 0
-    for input_, gold_annot in gold_examples:
-        label_list = labelled_span[i]
-        if i<len(labelled_span):
+    for input_textunit_, gold_annot in gold_annotations:
+        label_list_i = labelled_data_list[i]
+        if i<len(labelled_data_list):
             i = i+1
-        doc_under_evaluation = ner_model.make_doc(input_)
-        spans = [ doc_under_evaluation.char_span(label[0], label[1], label="GPE") for label in label_list]
-        doc_under_evaluation.ents = spans
-        pred_value = ner_model(input_)
-        print([(ent.text, ent.label_) for ent in pred_value.ents])
-        item = Example.from_dict(doc_under_evaluation, {"entities": gold_annot})
+        labelled_ner_textunit = ner_model.make_doc(input_textunit_)
+        spans = [ labelled_ner_textunit.char_span(label[0], label[1], label[2]) for label in label_list_i]
+        labelled_ner_textunit.ents = spans
+        item = Example.from_dict(labelled_ner_textunit, {"entities": gold_annot})
         list.append(item)
     scores = scorer.score(list)
     return scores
 
-# example run
 
-gold_data = [
-    ('I like Europe.',
-     [(7, 13, 'GPE')]),
-    ('I like Europe and Africa.',
-     [(7, 13, 'GPE'), (18, 24, 'GPE')]),
-    ('I like Europe and Africa and Japan.',
-     [(7, 13, 'GPE'), (18, 24, 'GPE'),(29,34, 'GPE')])
-]
-
-labelled_data = [
-    [(7, 13)],
-    [(7, 13),(18,24)],
-    [(7, 13),(18,24)]
-]
-
+#produce_annotation_files() #used once to produce external files
 ner_model = init_nlp()
+with open('gold.pickle', 'rb') as f:
+    loaded_gold_data = pickle.load(f)
+    print(loaded_gold_data)
+with open('labelled.pickle', 'rb') as f:
+    loaded_labelled_data = pickle.load(f)
+    print(loaded_labelled_data)
 print(ner_model.pipe_names)
-results = evaluate(ner_model, gold_data, labelled_data)
+results = evaluate(ner_model, loaded_gold_data, loaded_labelled_data)
 print(results)
