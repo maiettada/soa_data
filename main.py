@@ -3,6 +3,30 @@ from spacy.training import Example
 from spacy.scorer import Scorer
 import pickle
 
+import json
+
+def produce_test_json_line_gold():
+    '''gold_obj_json_l = {
+        ["text": "I like Europe and ice-creams.", "meta": {"ord_id": 91, "fr_id": 0}, "labels": [(7, 13, "GPE"),(18,28,"food")],
+        ["text": "I like Europe and ice-creams.", "meta": {"ord_id": 91, "fr_id": 0}, "labels": [(7, 13, 'GPE'),(18,28,'food')],
+        ["text": "I like Europe and ice-creams.", "meta": {"ord_id": 91, "fr_id": 0}, "labels": [(7, 13, 'GPE'),(18,28,'food')]
+    }'''
+    gold_obj_json = '{"text": "I like Europe and ice-creams.", "meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]}'
+    gold_obj = json.loads(gold_obj_json)
+    loaded_gold_data = [gold_obj['text'], gold_obj['labels']]
+    return loaded_gold_data
+
+def produce_test_json_line_labelled():
+    '''labelled_obj_json_l = {
+        [ "meta": {"ord_id": 91, "fr_id": 0}, "labels": [(7, 13, "GPE"),(18,28,"food")],
+        [ "meta": {"ord_id": 91, "fr_id": 0}, "labels": [(7, 13, 'GPE'),(18,28,'food')],
+        [ "meta": {"ord_id": 91, "fr_id": 0}, "labels": [(7, 13, 'GPE'),(18,28,'food')]
+    }'''
+    labelled_obj_json = '{"meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]}'
+    labelled_obj = json.loads(labelled_obj_json)
+    loaded_labelled_data =  labelled_obj['labels']
+    return loaded_labelled_data
+
 produce_annotation_files_gold_data = [
     ['I like Europe and ice-creams.', [(7, 13, 'GPE'),(18,28,'food')]],
     ['I like Europe and Africa and chocolate.', [(7, 13, 'GPE'), (18, 24, 'GPE'),(29,38,'food')]],
@@ -73,6 +97,7 @@ def format_data(file_data):
 ner_model = init_nlp()
 file_data = load_from_file()
 [loaded_gold_data, loaded_labelled_data] = format_data(file_data)
+[loaded_gold_data, loaded_labelled_data] = [[produce_test_json_line_gold()], [produce_test_json_line_labelled()]]
 print(ner_model.pipe_names)
 results = evaluate(ner_model, loaded_gold_data, loaded_labelled_data)
 print(results)
