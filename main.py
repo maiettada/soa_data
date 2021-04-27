@@ -34,9 +34,12 @@ def evaluate(ner_model, gold_annotations, labelled_data_list):
     list = []
     i = 0
     for input_textunit_, gold_annot in gold_annotations:
-        label_list_i = labelled_data_list[i]
-        if i<len(labelled_data_list):
-            i = i+1
+        if labelled_data_list:
+            label_list_i = labelled_data_list[i]
+            if i + 1 < len(labelled_data_list):
+                i = i + 1
+        else:
+            label_list_i = []
         labelled_ner_textunit = ner_model.make_doc(input_textunit_)
         spans = [ labelled_ner_textunit.char_span(label[0], label[1], label[2]) for label in label_list_i]
         labelled_ner_textunit.ents = spans
