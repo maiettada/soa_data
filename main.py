@@ -3,20 +3,20 @@ from spacy.training import Example
 from spacy.scorer import Scorer
 import pickle
 
-def produce_annotation_files():
-    gold_data = [
-    ['I like Europe and ice-creams.',
-     [(7, 13, 'GPE'),(18,28,'food')]],
-    ['I like Europe and Africa and chocolate.',
-     [(7, 13, 'GPE'), (18, 24, 'GPE'),(29,38,'food')]],
-    ['I like Europe and Africa and Japan.',
-     [(7, 13, 'GPE'), (18, 24, 'GPE'), (29, 34, 'GPE')]]
-    ]
-    labelled_data = [
-    [(7, 13, 'GPE')],
-    [(7, 13, 'GPE'),(18,24, 'GPE'),(29,38,'food')],
-    [(7, 13, 'GPE'),(18,24, 'GPE')]
-    ]
+produce_annotation_files_gold_data = [   ['I like Europe and ice-creams.',
+ [(7, 13, 'GPE'),(18,28,'food')]],
+['I like Europe and Africa and chocolate.',
+ [(7, 13, 'GPE'), (18, 24, 'GPE'),(29,38,'food')]],
+['I like Europe and Africa and Japan.',
+ [(7, 13, 'GPE'), (18, 24, 'GPE'), (29, 34, 'GPE')]]
+]
+produce_annotation_files_labelled_data = [
+[(7, 13, 'GPE')],
+[(7, 13, 'GPE'),(18,24, 'GPE'),(29,38,'food')],
+[(7, 13, 'GPE'),(18,24, 'GPE')]
+]
+
+def produce_annotation_files(gold_data, labelled_data):
     with open('gold.pickle', 'wb') as f:
         pickle.dump(gold_data, f)
     with open('labelled.pickle', 'wb') as f:
@@ -48,15 +48,33 @@ def evaluate(ner_model, gold_annotations, labelled_data_list):
     scores = scorer.score(list)
     return scores
 
+def load_pickle_data():
+    with open('gold.pickle', 'rb') as f:
+        loaded_gold_data = pickle.load(f)
+        print("read:", loaded_gold_data)
+    with open('labelled.pickle', 'rb') as f:
+        loaded_labelled_data = pickle.load(f)
+        print("read:", loaded_labelled_data)
+        return [loaded_gold_data, loaded_labelled_data]
 
-#produce_annotation_files() #used once to produce external files
+def load_from_file():
+    return load_pickle_data()
+
+def format_data(file_data):
+    """"
+    INTERFACE
+     - gold_data = [ ['I like Europe and ice-creams.', [(7, 13, 'GPE'),(18,28,'food')]],
+                    ...]
+     - labelled_data = [ [(7, 13, 'GPE')],
+                    ...]
+    returns [gold_data, labelled_data]
+    """
+    return file_data
+
+#produce_annotation_files(produce_annotation_files_gold_data,produce_annotation_files_labelled_data) #used once to produce external files
 ner_model = init_nlp()
-with open('gold.pickle', 'rb') as f:
-    loaded_gold_data = pickle.load(f)
-    print(loaded_gold_data)
-with open('labelled.pickle', 'rb') as f:
-    loaded_labelled_data = pickle.load(f)
-    print(loaded_labelled_data)
+file_data = load_from_file()
+[loaded_gold_data, loaded_labelled_data] = format_data(file_data)
 print(ner_model.pipe_names)
 results = evaluate(ner_model, loaded_gold_data, loaded_labelled_data)
 print(results)
