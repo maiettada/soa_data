@@ -3,17 +3,15 @@ from spacy.training import Example
 from spacy.scorer import Scorer
 import pickle
 
-produce_annotation_files_gold_data = [   ['I like Europe and ice-creams.',
- [(7, 13, 'GPE'),(18,28,'food')]],
-['I like Europe and Africa and chocolate.',
- [(7, 13, 'GPE'), (18, 24, 'GPE'),(29,38,'food')]],
-['I like Europe and Africa and Japan.',
- [(7, 13, 'GPE'), (18, 24, 'GPE'), (29, 34, 'GPE')]]
+produce_annotation_files_gold_data = [
+    ['I like Europe and ice-creams.', [(7, 13, 'GPE'),(18,28,'food')]],
+    ['I like Europe and Africa and chocolate.', [(7, 13, 'GPE'), (18, 24, 'GPE'),(29,38,'food')]],
+    ['I like Europe and Africa and Japan.', [(7, 13, 'GPE'), (18, 24, 'GPE'), (29, 34, 'GPE')]]
 ]
 produce_annotation_files_labelled_data = [
-[(7, 13, 'GPE')],
-[(7, 13, 'GPE'),(18,24, 'GPE'),(29,38,'food')],
-[(7, 13, 'GPE'),(18,24, 'GPE')]
+    [(7, 13, 'GPE')],
+    [(7, 13, 'GPE'),(18,24, 'GPE'),(29,38,'food')],
+    [(7, 13, 'GPE'),(18,24, 'GPE')]
 ]
 
 def produce_annotation_files(gold_data, labelled_data):
