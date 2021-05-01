@@ -7,12 +7,13 @@ import json
 
 def load_json_line_gold():
     '''converting json string/file to json-inner-data-representation'''
-    '''gold_obj_json_l = {
-        ["text": "I like Europe and ice-creams.", "meta": {"ord_id": 91, "fr_id": 0}, "labels": [(7, 13, "GPE"),(18,28,"food")],
-        ["text": "I like Europe and ice-creams.", "meta": {"ord_id": 91, "fr_id": 0}, "labels": [(7, 13, 'GPE'),(18,28,'food')],
-        ["text": "I like Europe and ice-creams.", "meta": {"ord_id": 91, "fr_id": 0}, "labels": [(7, 13, 'GPE'),(18,28,'food')]
-    }'''
+    json_string = '{ "cars": [\
+        {"text": "I like Europe and ice-creams.","meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]},\
+        {"text": "I like Europe and ice-creams.","meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]},\
+        {"text": "I like Europe and ice-creams.","meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]}\
+    ]}'
     gold_obj_json = '{"text": "I like Europe and ice-creams.", "meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]}'
+    labelled_obj  = json.loads(json_string)
     gold_obj = json.loads(gold_obj_json)
     return gold_obj
 
@@ -23,12 +24,13 @@ def format_json_line_data_gold(gold_obj):
 
 def load_json_line_labelled():
     '''converting json string/file to json-inner-data-representation'''
-    '''labelled_obj_json_l = {
-        [ "meta": {"ord_id": 91, "fr_id": 0}, "labels": [(7, 13, "GPE"),(18,28,"food")],
-        [ "meta": {"ord_id": 91, "fr_id": 0}, "labels": [(7, 13, 'GPE'),(18,28,'food')],
-        [ "meta": {"ord_id": 91, "fr_id": 0}, "labels": [(7, 13, 'GPE'),(18,28,'food')]
-    }'''
+    json_string = '{ "cars": [\
+        {"meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]},\
+        {"meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]},\
+        {"meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]}\
+    ]}'
     labelled_obj_json = '{"meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]}'
+    labelled_obj  = json.loads(json_string)
     labelled_obj = json.loads(labelled_obj_json)
     return labelled_obj
 
