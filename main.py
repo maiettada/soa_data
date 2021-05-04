@@ -2,41 +2,38 @@ import spacy
 from spacy.training import Example
 from spacy.scorer import Scorer
 import pickle
-
 import json
 
-def load_json_line_gold():
-    '''converting json string/file to json-inner-data-representation'''
-    json_string = '{ "cars": [\
-        {"text": "I like Europe and ice-creams.","meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]},\
-        {"text": "I like Europe and ice-creams.","meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]},\
-        {"text": "I like Europe and ice-creams.","meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]}\
-    ]}'
-    gold_obj_json = '{"text": "I like Europe and ice-creams.", "meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]}'
-    labelled_obj  = json.loads(json_string)
+gold_obj_json_string = '[\
+    {"text": "I like Europe and ice-creams.","meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]},\
+    {"text": "I like Europe and ice-creams.","meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]},\
+    {"text": "I like Europe and ice-creams.","meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]}\
+]'
+
+labelled_obj_json_string = '[\
+    {"meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]},\
+    {"meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"]]},\
+    {"meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"]]}\
+]'
+
+def load_json_line_gold(gold_obj_json):
+    '''converting json string to json-inner-data-representation'''
     gold_obj = json.loads(gold_obj_json)
     return gold_obj
 
 def format_json_line_data_gold(gold_obj):
     '''handling just json-data-structures'''
-    loaded_gold_data = [gold_obj['text'], gold_obj['labels']]
+    loaded_gold_data = [[item.get('text'), item.get('labels')] for item in gold_obj]
     return loaded_gold_data
 
-def load_json_line_labelled():
-    '''converting json string/file to json-inner-data-representation'''
-    json_string = '{ "cars": [\
-        {"meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]},\
-        {"meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]},\
-        {"meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]}\
-    ]}'
-    labelled_obj_json = '{"meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]}'
-    labelled_obj  = json.loads(json_string)
+def load_json_line_labelled(labelled_obj_json):
+    '''converting json string to json-inner-data-representation'''
     labelled_obj = json.loads(labelled_obj_json)
     return labelled_obj
 
 def format_json_line_data_labelled(labelled_obj):
     '''handling just json-data-structures'''
-    loaded_labelled_data =  labelled_obj['labels']
+    loaded_labelled_data = [item.get('labels') for item in labelled_obj]
     return loaded_labelled_data
 
 produce_annotation_files_gold_data = [
@@ -93,7 +90,7 @@ def load_pickle_data():
 
 def load_from_file():
     #return load_pickle_data()
-    return [load_json_line_gold(), load_json_line_labelled()]
+    return [load_json_line_gold(gold_obj_json_string), load_json_line_labelled(labelled_obj_json_string)]
 
 def format_data(file_data):
     """"
@@ -109,7 +106,7 @@ def format_data(file_data):
     file_data_labelled = file_data[1]
     gold = format_json_line_data_gold(file_data_gold)
     labelled = format_json_line_data_labelled(file_data_labelled)
-    return [[gold], [labelled]]
+    return [gold, labelled]
 
 
 #produce_annotation_files(produce_annotation_files_gold_data,produce_annotation_files_labelled_data) #used once to produce external files
