@@ -16,25 +16,30 @@ labelled_obj_json_string = '[\
     {"meta": {"ord_id": 91, "fr_id": 0}, "labels": [[7, 13, "GPE"]]}\
 ]'
 
+
 def load_json_line_gold(gold_obj_json):
     '''converting json string to json-inner-data-representation'''
     gold_obj = json.loads(gold_obj_json)
     return gold_obj
+
 
 def format_json_line_data_gold(gold_obj):
     '''handling just json-data-structures'''
     loaded_gold_data = [[item.get('text'), item.get('labels')] for item in gold_obj]
     return loaded_gold_data
 
+
 def load_json_line_labelled(labelled_obj_json):
     '''converting json string to json-inner-data-representation'''
     labelled_obj = json.loads(labelled_obj_json)
     return labelled_obj
 
+
 def format_json_line_data_labelled(labelled_obj):
     '''handling just json-data-structures'''
     loaded_labelled_data = [item.get('labels') for item in labelled_obj]
     return loaded_labelled_data
+
 
 produce_annotation_files_gold_data = [
     ['I like Europe and ice-creams.', [(7, 13, 'GPE'),(18,28,'food')]],
@@ -47,11 +52,13 @@ produce_annotation_files_labelled_data = [
     [(7, 13, 'GPE'),(18,24, 'GPE')]
 ]
 
+
 def produce_annotation_files(gold_data, labelled_data):
     with open('gold.pickle', 'wb') as f:
         pickle.dump(gold_data, f)
     with open('labelled.pickle', 'wb') as f:
         pickle.dump(labelled_data, f)
+
 
 def init_nlp():
     nlp = spacy.blank("en")
@@ -79,6 +86,7 @@ def evaluate(ner_model, gold_annotations, labelled_data_list):
     scores = scorer.score(list)
     return scores
 
+
 def load_pickle_data():
     with open('gold.pickle', 'rb') as f:
         loaded_gold_data = pickle.load(f)
@@ -88,9 +96,11 @@ def load_pickle_data():
         print("read:", loaded_labelled_data)
         return [loaded_gold_data, loaded_labelled_data]
 
+
 def load_from_file():
     #return load_pickle_data()
     return [load_json_line_gold(gold_obj_json_string), load_json_line_labelled(labelled_obj_json_string)]
+
 
 def format_data(file_data):
     """"
