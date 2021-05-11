@@ -57,14 +57,6 @@ produce_annotation_files_labelled_data = [
     [(7, 13, 'GPE'),(18,24, 'GPE')]
 ]
 
-
-def produce_annotation_files(gold_data, labelled_data):
-    with open('gold.pickle', 'wb') as f:
-        pickle.dump(gold_data, f)
-    with open('labelled.pickle', 'wb') as f:
-        pickle.dump(labelled_data, f)
-
-
 def init_nlp():
     nlp = spacy.blank("en")
     nlp.add_pipe("ner")
@@ -93,17 +85,6 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines):
         list.append(item)
     scores = scorer.score(list)
     return scores
-
-
-def load_pickle_data():
-    with open('gold.pickle', 'rb') as f:
-        loaded_gold_data = pickle.load(f)
-        print("read:", loaded_gold_data)
-    with open('labelled.pickle', 'rb') as f:
-        loaded_labelled_data = pickle.load(f)
-        print("read:", loaded_labelled_data)
-        return [loaded_gold_data, loaded_labelled_data]
-
 
 def load_json_line_list(json1_filename):
     '''converting jsonl file (string made of lines of json) into list of json objects'''
@@ -141,7 +122,6 @@ def format_data(file_data):
     return [gold, labelled]
 
 
-#produce_annotation_files(produce_annotation_files_gold_data,produce_annotation_files_labelled_data) #used once to produce external files
 ner_model = init_nlp()
 file_data = load_from_file()
 [loaded_gold_data, loaded_labelled_data] = format_data(file_data)
