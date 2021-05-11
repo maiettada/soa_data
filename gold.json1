@@ -1,0 +1,3 @@
+{"text": "I like Europe and ice-creams.","meta": {"ord_id": 1, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]}
+{"text": "I like Europe and ice-creams.","meta": {"ord_id": 2, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]}
+{"text": "I like Europe and ice-creams.","meta": {"ord_id": 4, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]}
