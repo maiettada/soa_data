@@ -9,18 +9,6 @@ gold_json1_filename = 'gold.json1'
 
 labelled_json1_filename = 'labelled.json1'
 
-gold_obj_json_string = '[\
-    {"text": "I like Europe and ice-creams.","meta": {"ord_id": 1, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]},\
-    {"text": "I like Europe and ice-creams.","meta": {"ord_id": 2, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]},\
-    {"text": "I like Europe and ice-creams.","meta": {"ord_id": 4, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]}\
-]'
-
-labelled_obj_json_string = '[\
-    {"meta": {"ord_id": 1, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]},\
-    {"meta": {"ord_id": 2, "fr_id": 0}, "labels": [[7, 13, "GPE"]]},\
-    {"meta": {"ord_id": 3, "fr_id": 0}, "labels": [[7, 13, "GPE"]]}\
-]'
-
 
 def load_json_line_gold(gold_obj_json):
     '''converting json string to json-inner-data-representation'''
@@ -45,17 +33,6 @@ def format_json_line_data_labelled(labelled_obj):
     loaded_labelled_data = [[item.get('labels'), item.get('meta').get('ord_id')] for item in labelled_obj]
     return loaded_labelled_data
 
-
-produce_annotation_files_gold_data = [
-    ['I like Europe and ice-creams.', [(7, 13, 'GPE'),(18,28,'food')]],
-    ['I like Europe and Africa and chocolate.', [(7, 13, 'GPE'), (18, 24, 'GPE'),(29,38,'food')]],
-    ['I like Europe and Africa and Japan.', [(7, 13, 'GPE'), (18, 24, 'GPE'), (29, 34, 'GPE')]]
-]
-produce_annotation_files_labelled_data = [
-    [(7, 13, 'GPE')],
-    [(7, 13, 'GPE'),(18,24, 'GPE'),(29,38,'food')],
-    [(7, 13, 'GPE'),(18,24, 'GPE')]
-]
 
 def init_nlp():
     nlp = spacy.blank("en")
@@ -85,6 +62,7 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines):
         list.append(item)
     scores = scorer.score(list)
     return scores
+
 
 def load_json_line_list(json1_filename):
     '''converting jsonl file (string made of lines of json) into list of json objects'''
