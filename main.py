@@ -5,6 +5,10 @@ import spacy
 from spacy.scorer import Scorer
 from spacy.training import Example
 
+gold_json1_filename = 'gold.json1'
+
+labelled_json1_filename = 'labelled.json1'
+
 gold_obj_json_string = '[\
     {"text": "I like Europe and ice-creams.","meta": {"ord_id": 1, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]},\
     {"text": "I like Europe and ice-creams.","meta": {"ord_id": 2, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]},\
@@ -101,11 +105,23 @@ def load_pickle_data():
         return [loaded_gold_data, loaded_labelled_data]
 
 
+def load_json_line_list(json1_filename):
+    '''converting jsonl file (string made of lines of json) into list of json objects'''
+    labelled_obj_list = []
+    with open(json1_filename, "r") as a_file:
+        for line in a_file:
+            stripped_line = line.strip()
+            labelled_obj_i = json.loads(stripped_line)
+            labelled_obj_list.append(labelled_obj_i)
+    return labelled_obj_list
+
+
 def load_from_file():
     #return load_pickle_data()
     # json line: it's a full JSON  of a jsonl file.
     # In this context, a json line is related to an entire document
-    return [load_json_line_gold(gold_obj_json_string), load_json_line_labelled(labelled_obj_json_string)]
+    #return [load_json_line_gold(gold_obj_json_string), load_json_line_labelled(labelled_obj_json_string)] #for json-list encoded in string
+    return [load_json_line_list(gold_json1_filename), load_json_line_list(labelled_json1_filename)]
 
 
 def format_data(file_data):
