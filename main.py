@@ -41,7 +41,7 @@ def init_nlp():
     return nlp
 
 
-def evaluate(ner_model, gold_annotations, labelled_data_lines):
+def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory):
     scorer = Scorer(ner_model)
     list = []
     i = 0
@@ -56,9 +56,14 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines):
             else:
                 label_list_i = []
         labelled_ner_textunit = ner_model.make_doc(gold_textunit)
-        spans = [ labelled_ner_textunit.char_span(start_offset, end_offset, word) for [start_offset, end_offset, word] in label_list_i ]
+        spans = [ labelled_ner_textunit.char_span(start_offset, end_offset, word)
+                  for [start_offset, end_offset, word] in label_list_i
+                  if word in label_subcategory ]
         labelled_ner_textunit.ents = spans
-        item = Example.from_dict(labelled_ner_textunit, {"entities": gold_annots})
+        item = Example.from_dict(labelled_ner_textunit, {"entities": [[start_offset, end_offset, word]
+                                                                      for [start_offset, end_offset, word]
+                                                                      in gold_annots
+                                                                      if word in label_subcategory]})
         list.append(item)
     scores = scorer.score(list)
     return scores
@@ -103,13 +108,11 @@ def format_data(file_data):
 ner_model = init_nlp()
 file_data = load_from_file()
 [loaded_gold_data, loaded_labelled_data] = format_data(file_data)
-print(ner_model.pipe_names)
-results = evaluate(ner_model, loaded_gold_data, loaded_labelled_data)
-print(results)
-
-
-
-
+#print(ner_model.pipe_names)
+evaluation_subcategory_lists = [['food','drink'],['GPE','GPF']]
+for label_subcategory in evaluation_subcategory_lists:
+   results = evaluate(ner_model, loaded_gold_data, loaded_labelled_data, label_subcategory)
+   print(label_subcategory," results\n: ", results )
 
 
 
