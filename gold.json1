@@ -1,3 +1,3 @@
-{"text": "I like Europe and ice-creams.","meta": {"ord_id": 1, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]}
-{"text": "I like Europe and ice-creams.","meta": {"ord_id": 2, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]}
-{"text": "I like Europe and ice-creams.","meta": {"ord_id": 4, "fr_id": 0}, "labels": [[7, 13, "GPE"],[18,28,"food"]]}
+{"text": "classifica I e categoria OG 1 ","meta": {"ord_id": 1, "fr_id": 0}, "labels": [[11, 12, "I"],[25, 29, "OG-1"]]}
+{"text": "categ O.G.10 e categoria OG 1 ","meta": {"ord_id": 2, "fr_id": 0}, "labels": [[6, 12, "OG-10"],[25, 29,"OG-1"]]}
+{"text": "categ OpG-10 cl. I categ OG 1 ","meta": {"ord_id": 4, "fr_id": 0}, "labels": [[6, 12, "OG-10"],[17, 18, "I"],[25, 29,"OG-1"]]}
