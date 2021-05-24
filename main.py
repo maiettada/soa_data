@@ -114,6 +114,5 @@ for label_subcategory in evaluation_subcategory_lists:
    results = evaluate(ner_model, loaded_gold_data, loaded_labelled_data, label_subcategory)
    print(label_subcategory," results\n: ", results )
 
-
-
+#abracadabra
 
