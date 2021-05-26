@@ -10,6 +10,14 @@ gold_json1_filename = 'gold.json1'
 labelled_json1_filename = 'labelled.json1'
 
 
+def overlaps(interv_1, interv_2):
+    overlapping = False
+    if interv_2[1] - interv_1[0] > 0:
+        if interv_1[1] - interv_2[0] > 0:
+            overlapping = True
+    return overlapping
+
+
 def load_json_line_gold(gold_obj_json):
     '''converting json string to json-inner-data-representation'''
     gold_obj = json.loads(gold_obj_json)
@@ -50,16 +58,45 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory
             label_list_i = []
         else:
             label_list_i_enclosed = [labelled_data_line_objects[0] for labelled_data_line_objects in labelled_data_lines
-                            if labelled_data_line_objects[1] == gold_ord_id]
+                                     if labelled_data_line_objects[1] == gold_ord_id]
             if label_list_i_enclosed:
                 label_list_i = label_list_i_enclosed[0]
             else:
                 label_list_i = []
         labelled_ner_textunit = ner_model.make_doc(gold_textunit)
-        spans = [ labelled_ner_textunit.char_span(start_offset, end_offset, word)
-                  for [start_offset, end_offset, word] in label_list_i
-                  if word in label_subcategory ]
-        labelled_ner_textunit.ents = spans
+        '''
+        #printing lists goldVSlabelled
+        print( [[start_offset, end_offset, word] for [start_offset, end_offset, word] 
+              in label_list_i
+              if word in label_subcategory ])
+        print( [[start_offset, end_offset, word]
+              for [start_offset, end_offset, word]
+              in gold_annots
+              if word in label_subcategory])
+        '''
+        '''
+        label_list_i_naive_approach = [[start_offset, end_offset, word]
+                          for [start_offset, end_offset, word]
+                          in label_list_i
+                          if word in label_subcategory]
+        label_list_i_strict_approach = [[start_offset, end_offset, word]
+                          for [start_offset, end_offset, word]
+                          in label_list_i
+                          if [start_offset, end_offset, word] in gold_annots
+                          if word in label_subcategory]
+                          '''
+        used = []
+        label_list_i_loose_approach = [[gold_start_offset, gold_end_offset, word]
+                                       for [start_offset, end_offset, word] in label_list_i
+                                       for [gold_start_offset, gold_end_offset, gold_word] in gold_annots
+                                       if overlaps([start_offset, end_offset], [gold_start_offset, gold_end_offset])
+                                       and [gold_start_offset, gold_end_offset, word] not in used
+                                       and (used.append([gold_start_offset, gold_end_offset, word]) or True)
+                                       ]
+        spans_i = [labelled_ner_textunit.char_span(start_offset, end_offset, word)
+                   for [start_offset, end_offset, word] in label_list_i_loose_approach
+                   if word in label_subcategory]
+        labelled_ner_textunit.ents = spans_i
         item = Example.from_dict(labelled_ner_textunit, {"entities": [[start_offset, end_offset, word]
                                                                       for [start_offset, end_offset, word]
                                                                       in gold_annots
@@ -81,10 +118,10 @@ def load_json_line_list(json1_filename):
 
 
 def load_from_file():
-    #return load_pickle_data()
+    # return load_pickle_data()
     # json line: it's a full JSON  of a jsonl file.
     # In this context, a json line is related to an entire document
-    #return [load_json_line_gold(gold_obj_json_string), load_json_line_labelled(labelled_obj_json_string)] #for json-list encoded in string
+    # return [load_json_line_gold(gold_obj_json_string), load_json_line_labelled(labelled_obj_json_string)] #for json-list encoded in string
     return [load_json_line_list(gold_json1_filename), load_json_line_list(labelled_json1_filename)]
 
 
@@ -97,7 +134,7 @@ def format_data(file_data):
                     ...]
     returns [gold_data, labelled_data]
     """
-    #return file_data
+    # return file_data
     file_data_gold = file_data[0]
     file_data_labelled = file_data[1]
     gold = format_json_line_data_gold(file_data_gold)
@@ -108,19 +145,15 @@ def format_data(file_data):
 ner_model = init_nlp()
 file_data = load_from_file()
 [loaded_gold_data, loaded_labelled_data] = format_data(file_data)
-#print(ner_model.pipe_names)
-soa_classifiche = ['I','II','III-bis','IV','IV-bis','V','VI','VII','VIII']
+# print(ner_model.pipe_names)
+soa_classifiche = ['I', 'II', 'III-bis', 'IV', 'IV-bis', 'V', 'VI', 'VII', 'VIII']
 soa_categorie = ['OG-1', 'OG-2', 'OG-3', 'OG-4', 'OG-5', 'OG-6', 'OG-7', 'OG-8', 'OG-9', 'OG-10',
-                 'OG-11', 'OG-12', 'OG-13','OS-1', 'OS-2A', 'OS-2B', 'OS-3', 'OS-4', 'OS-5', 'OS-6',
+                 'OG-11', 'OG-12', 'OG-13', 'OS-1', 'OS-2A', 'OS-2B', 'OS-3', 'OS-4', 'OS-5', 'OS-6',
                  'OS-7', 'OS-8', 'OS-9', 'OS-10', 'OS-11', 'OS-12A', 'OS-12B', 'OS-13',
                  'OS-14', 'OS-15', 'OS-16', 'OS-17', 'OS-18A', 'OS-18B', 'OS-19', 'OS-20A',
                  'OS-20B', 'OS-21', 'OS-22', 'OS-23', 'OS-24', 'OS-25', 'OS-26', 'OS-27',
                  'OS-28', 'OS-29', 'OS-30', 'OS-31', 'OS-32', 'OS-33', 'OS-34', 'OS-35']
-evaluation_subcategory_lists = [soa_classifiche, soa_categorie]
+evaluation_subcategory_lists = [soa_categorie, soa_classifiche]
 for label_subcategory in evaluation_subcategory_lists:
-   results = evaluate(ner_model, loaded_gold_data, loaded_labelled_data, label_subcategory)
-   print(label_subcategory," results\n: ", results,"\n\n" )
-
-
-
-
+    results = evaluate(ner_model, loaded_gold_data, loaded_labelled_data, label_subcategory)
+    print(label_subcategory, " results\n: ", results, "\n\n")
