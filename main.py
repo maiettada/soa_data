@@ -64,27 +64,6 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory
             else:
                 label_list_i = []
         labelled_ner_textunit = ner_model.make_doc(gold_textunit)
-        '''
-        #printing lists goldVSlabelled
-        print( [[start_offset, end_offset, word] for [start_offset, end_offset, word] 
-              in label_list_i
-              if word in label_subcategory ])
-        print( [[start_offset, end_offset, word]
-              for [start_offset, end_offset, word]
-              in gold_annots
-              if word in label_subcategory])
-        '''
-        '''
-        label_list_i_naive_approach = [[start_offset, end_offset, word]
-                          for [start_offset, end_offset, word]
-                          in label_list_i
-                          if word in label_subcategory]
-        label_list_i_strict_approach = [[start_offset, end_offset, word]
-                          for [start_offset, end_offset, word]
-                          in label_list_i
-                          if [start_offset, end_offset, word] in gold_annots
-                          if word in label_subcategory]
-                          '''
         used = []
         label_list_i_loose_approach = [[gold_start_offset, gold_end_offset, word]
                                        for [start_offset, end_offset, word] in label_list_i
