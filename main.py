@@ -68,11 +68,14 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory
         gold_annots = [[s_o,e_o,label] for [s_o,e_o,label] in gold_annots if label in label_subcategory]
         labelled_ner_textunit = ner_model.make_doc(gold_textunit)
         #tags = offsets_to_biluo_tags(labelled_ner_textunit, gold_annots)
-        #print( tags)
+        '''
+        #debug info
+        print( tags)
         text_pieces = [[gold_start_offset,gold_end_offset,gold_textunit[gold_start_offset:gold_end_offset]]
                         for [gold_start_offset, gold_end_offset, word]
                         in gold_annots]
         print(text_pieces)
+        '''
         used = []
         label_list_i_loose_approach = [[gold_start_offset, gold_end_offset, word]
                                        for [start_offset, end_offset, word] in label_list_i
@@ -146,6 +149,8 @@ soa_categorie = ['OG-1', 'OG-2', 'OG-3', 'OG-4', 'OG-5', 'OG-6', 'OG-7', 'OG-8',
                  'OS-20B', 'OS-21', 'OS-22', 'OS-23', 'OS-24', 'OS-25', 'OS-26', 'OS-27',
                  'OS-28', 'OS-29', 'OS-30', 'OS-31', 'OS-32', 'OS-33', 'OS-34', 'OS-35']
 evaluation_subcategory_lists = [soa_categorie, soa_classifiche]
+results = [None,None]
 for label_subcategory in evaluation_subcategory_lists:
-    results = evaluate(ner_model, loaded_gold_data, loaded_labelled_data, label_subcategory)
-    print(label_subcategory, " results\n: ", results, "\n\n")
+    results[evaluation_subcategory_lists.index(label_subcategory)] = evaluate(ner_model, loaded_gold_data, loaded_labelled_data, label_subcategory)
+for label_subcategory in evaluation_subcategory_lists:
+    print(label_subcategory, " results\n: ", results[evaluation_subcategory_lists.index(label_subcategory)], "\n\n")
