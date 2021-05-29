@@ -4,6 +4,7 @@ import pickle
 import spacy
 from spacy.scorer import Scorer
 from spacy.training import Example
+from spacy.training import offsets_to_biluo_tags
 
 gold_json1_filename = 'gold.json1'
 
@@ -63,7 +64,15 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory
                 label_list_i = label_list_i_enclosed[0]
             else:
                 label_list_i = []
+        label_list_i = [[s_o,e_o,label] for [s_o,e_o,label] in label_list_i if label in label_subcategory]
+        gold_annots = [[s_o,e_o,label] for [s_o,e_o,label] in gold_annots if label in label_subcategory]
         labelled_ner_textunit = ner_model.make_doc(gold_textunit)
+        #tags = offsets_to_biluo_tags(labelled_ner_textunit, gold_annots)
+        #print( tags)
+        text_pieces = [[gold_start_offset,gold_end_offset,gold_textunit[gold_start_offset:gold_end_offset]]
+                        for [gold_start_offset, gold_end_offset, word]
+                        in gold_annots]
+        print(text_pieces)
         used = []
         label_list_i_loose_approach = [[gold_start_offset, gold_end_offset, word]
                                        for [start_offset, end_offset, word] in label_list_i
@@ -73,13 +82,15 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory
                                        and (used.append([gold_start_offset, gold_end_offset, word]) or True)
                                        ]
         spans_i = [labelled_ner_textunit.char_span(start_offset, end_offset, word)
-                   for [start_offset, end_offset, word] in label_list_i_loose_approach
-                   if word in label_subcategory]
-        labelled_ner_textunit.ents = spans_i
+                   for [start_offset, end_offset, word] in label_list_i_loose_approach]
+        #tags = offsets_to_biluo_tags(labelled_ner_textunit, spans_i)
+        try:
+            labelled_ner_textunit.ents = spans_i
+        except TypeError:
+            labelled_ner_textunit.ents = []
         item = Example.from_dict(labelled_ner_textunit, {"entities": [[start_offset, end_offset, word]
                                                                       for [start_offset, end_offset, word]
-                                                                      in gold_annots
-                                                                      if word in label_subcategory]})
+                                                                      in gold_annots]})
         list.append(item)
     scores = scorer.score(list)
     return scores
@@ -101,7 +112,9 @@ def load_from_file():
     # json line: it's a full JSON  of a jsonl file.
     # In this context, a json line is related to an entire document
     # return [load_json_line_gold(gold_obj_json_string), load_json_line_labelled(labelled_obj_json_string)] #for json-list encoded in string
-    return [load_json_line_list(gold_json1_filename), load_json_line_list(labelled_json1_filename)]
+    json_line_list_gold = load_json_line_list(gold_json1_filename)
+    json_line_list_labelled = load_json_line_list(labelled_json1_filename)
+    return [json_line_list_gold, json_line_list_labelled]
 
 
 def format_data(file_data):
