@@ -80,15 +80,6 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory
         label_list_i = [[s_o,e_o,label] for [s_o,e_o,label] in label_list_i if label in label_subcategory]
         gold_annots = [[s_o,e_o,label] for [s_o,e_o,label] in gold_annots if label in label_subcategory]
         labelled_ner_textunit = ner_model.make_doc(gold_textunit)
-        #tags = offsets_to_biluo_tags(labelled_ner_textunit, gold_annots)
-        '''
-        #debug info
-        print( tags)
-        text_pieces = [[gold_start_offset,gold_end_offset,gold_textunit[gold_start_offset:gold_end_offset]]
-                        for [gold_start_offset, gold_end_offset, word]
-                        in gold_annots]
-        print(text_pieces)
-        '''
         used = []
         label_list_i_loose_approach = [[gold_start_offset, gold_end_offset, word]
                                        for [start_offset, end_offset, word] in label_list_i
@@ -99,11 +90,15 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory
                                        ]
         spans_i = [labelled_ner_textunit.char_span(start_offset, end_offset, word)
                    for [start_offset, end_offset, word] in label_list_i_loose_approach]
-        #tags = offsets_to_biluo_tags(labelled_ner_textunit, spans_i)
-        try:
-            labelled_ner_textunit.ents = spans_i
-        except TypeError:
-            labelled_ner_textunit.ents = []
+        labelled_ner_textunit.ents = []
+        added_spans = []
+        for span_i_j in spans_i:
+            try:
+                added_spans.append(span_i_j)
+                labelled_ner_textunit.ents = added_spans
+            except TypeError:
+                added_spans.remove(span_i_j)
+            pass
         item = Example.from_dict(labelled_ner_textunit, {"entities": [[start_offset, end_offset, word]
                                                                       for [start_offset, end_offset, word]
                                                                       in gold_annots]})
