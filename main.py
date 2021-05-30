@@ -7,8 +7,21 @@ from spacy.training import Example
 from spacy.training import offsets_to_biluo_tags
 
 gold_json1_filename = 'gold.json1'
-
 labelled_json1_filename = 'labelled.json1'
+output_filename='output_file.txt'
+
+
+def to_output_file(strings):
+    with open(output_filename, "a") as a_file:
+        for string in strings:
+            a_file.write(string)
+    return
+
+
+def handle_outputs():
+    import warnings
+    warnings.filterwarnings("ignore")
+    return
 
 
 def overlaps(interv_1, interv_2):
@@ -136,7 +149,7 @@ def format_data(file_data):
     labelled = format_json_line_data_labelled(file_data_labelled)
     return [gold, labelled]
 
-
+handle_outputs()
 ner_model = init_nlp()
 file_data = load_from_file()
 [loaded_gold_data, loaded_labelled_data] = format_data(file_data)
@@ -153,4 +166,7 @@ results = [None,None]
 for label_subcategory in evaluation_subcategory_lists:
     results[evaluation_subcategory_lists.index(label_subcategory)] = evaluate(ner_model, loaded_gold_data, loaded_labelled_data, label_subcategory)
 for label_subcategory in evaluation_subcategory_lists:
-    print(label_subcategory, " results\n: ", results[evaluation_subcategory_lists.index(label_subcategory)], "\n\n")
+    to_output_file(str(label_subcategory) +
+                   " results\n: " +
+                   str(results[evaluation_subcategory_lists.index(label_subcategory)]) +
+                   "\n\n")
