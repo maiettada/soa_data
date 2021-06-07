@@ -7,7 +7,7 @@ from spacy.training import Example
 from spacy.training import offsets_to_biluo_tags
 
 gold_json1_filename = 'gold.json1'
-labelled_json1_filename = 'labelled.json1'
+labelled_json1_filename = 'v3.json1'
 output_filename='output_file.txt'
 
 
