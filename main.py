@@ -62,6 +62,31 @@ def init_nlp():
     nlp.begin_training()
     return nlp
 
+def selection_list(label_list_i, gold_annots, label_subcategory, approach=3):
+    if approach == 1:
+        label_list_i_naive_approach = [[start_offset, end_offset, word]
+                                   for [start_offset, end_offset, word]
+                                   in label_list_i
+                                   if word in label_subcategory]
+        return label_list_i_naive_approach
+    elif approach == 2:
+        label_list_i_strict_approach = [[start_offset, end_offset, word]
+                                    for [start_offset, end_offset, word]
+                                    in label_list_i
+                                    if [start_offset, end_offset, word] in gold_annots
+                                    if word in label_subcategory]
+        return label_list_i_strict_approach
+    elif approach == 3:
+        used = []
+        label_list_i_loose_approach = [[gold_start_offset, gold_end_offset, word]
+                                   for [start_offset, end_offset, word] in label_list_i
+                                   for [gold_start_offset, gold_end_offset, gold_word] in gold_annots
+                                   if overlaps([start_offset, end_offset], [gold_start_offset, gold_end_offset])
+                                   and [gold_start_offset, gold_end_offset, word] not in used
+                                   and (used.append([gold_start_offset, gold_end_offset, word]) or True)
+                                   ]
+        return label_list_i_loose_approach
+
 
 def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory):
     scorer = Scorer(ner_model)
@@ -80,16 +105,9 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory
         label_list_i = [[s_o,e_o,label] for [s_o,e_o,label] in label_list_i if label in label_subcategory]
         gold_annots = [[s_o,e_o,label] for [s_o,e_o,label] in gold_annots if label in label_subcategory]
         labelled_ner_textunit = ner_model.make_doc(gold_textunit)
-        used = []
-        label_list_i_loose_approach = [[gold_start_offset, gold_end_offset, word]
-                                       for [start_offset, end_offset, word] in label_list_i
-                                       for [gold_start_offset, gold_end_offset, gold_word] in gold_annots
-                                       if overlaps([start_offset, end_offset], [gold_start_offset, gold_end_offset])
-                                       and [gold_start_offset, gold_end_offset, word] not in used
-                                       and (used.append([gold_start_offset, gold_end_offset, word]) or True)
-                                       ]
+        label_list_i_selection = selection_list(label_list_i, gold_annots, label_subcategory)
         spans_i = [labelled_ner_textunit.char_span(start_offset, end_offset, word)
-                   for [start_offset, end_offset, word] in label_list_i_loose_approach]
+                   for [start_offset, end_offset, word] in label_list_i_selection]
         labelled_ner_textunit.ents = []
         added_spans = []
         for span_i_j in spans_i:
