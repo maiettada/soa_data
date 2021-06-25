@@ -1,3 +1,25 @@
+class labelledObj:
+
+    # default constructor
+    def __init__(self, label=""):
+        self.label = str(label)
+        self.list = [1,2,3]
+
+    # a method for printing data members
+    def print_label(self):
+        print(self.label)
+
+    def print_list(self):
+        print(self.list)
+
+
+# creating object of the class
+obj_list = [ labelledObj(" tizio"), labelledObj(" caio"), labelledObj(" sempronio")]
+for obj in obj_list:
+    obj.print_label()
+    obj.print_list()
+
+
 def sort_list(lis):
  lis.sort(key=lambda x:x[0])
 
@@ -46,3 +68,8 @@ json_list = [[0,5,"p1"],[7,14,"p2"],[16,19,"p3w1"],[20,24,"p3w2"]]
 recursive_select(json_list, txt)
 print("-----")
 print(a)
+
+listatizio = []
+listacaio = []
+listasempronio = []
+mappa = [("tizio", listatizio),("caio", listacaio),("sempronio", listasempronio)]
