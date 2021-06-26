@@ -13,12 +13,6 @@ class labelledObj:
         print(self.list)
 
 
-# creating object of the class
-obj_list = [ labelledObj(" tizio"), labelledObj(" caio"), labelledObj(" sempronio")]
-for obj in obj_list:
-    obj.print_label()
-    obj.print_list()
-
 
 def sort_list(lis):
  lis.sort(key=lambda x:x[0])
@@ -69,7 +63,21 @@ recursive_select(json_list, txt)
 print("-----")
 print(a)
 
-listatizio = []
-listacaio = []
-listasempronio = []
-mappa = [("tizio", listatizio),("caio", listacaio),("sempronio", listasempronio)]
+
+
+soa_classifiche = ['I', 'II', 'III-bis', 'IV', 'IV-bis', 'V', 'VI', 'VII', 'VIII']
+soa_categorie = ['OG-1', 'OG-2', 'OG-3', 'OG-4', 'OG-5', 'OG-6', 'OG-7', 'OG-8', 'OG-9', 'OG-10',
+                 'OG-11', 'OG-12', 'OG-13', 'OS-1', 'OS-2A', 'OS-2B', 'OS-3', 'OS-4', 'OS-5', 'OS-6',
+                 'OS-7', 'OS-8', 'OS-9', 'OS-10', 'OS-11', 'OS-12A', 'OS-12B', 'OS-13',
+                 'OS-14', 'OS-15', 'OS-16', 'OS-17', 'OS-18A', 'OS-18B', 'OS-19', 'OS-20A',
+                 'OS-20B', 'OS-21', 'OS-22', 'OS-23', 'OS-24', 'OS-25', 'OS-26', 'OS-27',
+                 'OS-28', 'OS-29', 'OS-30', 'OS-31', 'OS-32', 'OS-33', 'OS-34', 'OS-35']
+label_list = soa_categorie+soa_classifiche
+# creating object of the class
+obj_list = []
+for label in label_list:
+    new_obj = labelledObj(label)
+    obj_list.append(new_obj)
+for obj in obj_list:
+    obj.print_label()
+    obj.print_list()
