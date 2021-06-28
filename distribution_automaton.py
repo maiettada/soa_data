@@ -5,38 +5,55 @@ class Distribution_automaton:
     # default constructor
     # DFA which matches all binary strings ending in an odd number of '1's
     def __init__(self, label=""):
-        self.dfa = DFA(
-    states={'q0', 'q1'},
-    input_symbols={'0', '1'},
-    transitions={
-        'q0': {'0': 'q0', '1': 'q1'},
-        'q1': {'0': 'q0', '1': 'q0'}
-    },
-    initial_state='q0',
-    final_states={'q1','q0'}
-)
+        self.label = label
+        self.count = 0
+
+    def label_increase(self):
+        self.count = self.count + 1
+
+    def how_many_distributions(self):
+        return self.count/10
 
     def read_decision(self, input=''):
+        for ch in input:
+            if ch == "1":
+                self.label_increase()
         """returns 0 meaning put into train set  (desired size 70%),
                    1 meaning put into dev set    (desired size 10%),
                    or
                    2 meaning put into test set   (desired size 20%)
         """
-        state = self.dfa.read_input(input)
+        state = self.count % 10
         decision = 0
-        if state == 'q0':
+        if state == 1:
             decision = 0
-        elif state == 'q1':
+        elif state == 2:
             decision = 1
-        elif state == 'q2':
+        elif state == 3:
             decision = 2
+        elif state == 4:
+            decision = 0
+        elif state == 5:
+            decision = 2
+        else:
+            decision = 0
         return decision
 
 
 autom = Distribution_automaton()
 
-print(autom.read_decision())
-print(autom.read_decision('00111'))
-print(autom.read_decision('001111'))
+
+autom.label_increase()
+print(autom.read_decision()) # decision: insert into train set
+
+autom.label_increase()
+print(autom.read_decision()) # decision: insert into dev set
+
+#equivale a increase+read_decision()
+print(autom.read_decision('1')) # decision: insert into test set
+
+#insert 7 more to complete the distribution
+print(autom.read_decision('1111111')) # decision: insert into test set
 
 
+print("How many distributions were completed?", autom.how_many_distributions())
