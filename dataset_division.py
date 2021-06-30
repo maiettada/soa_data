@@ -1,17 +1,4 @@
-class labelledObj:
-
-    # default constructor
-    def __init__(self, label=""):
-        self.label = str(label)
-        self.list = [1, 2, 3]
-
-    # a method for printing data members
-    def print_label(self):
-        print(self.label)
-
-    def print_list(self):
-        print(self.list)
-
+from distribution_automaton import DistributionAutomaton
 
 def sort_list(lis):
     lis.sort(key=lambda x: x[0])
@@ -42,12 +29,18 @@ def prendo_labels_fino_a(json_list, char_index):
     return [selection, remaining]
 
 
-def recursive_select(json_list, txt):
+def period_sect(json_list, txt, a):
+    """
+
+    :param json_list:
+    :param txt:
+    :return:
+    """
     # = int(input('Enter a number: '))
-    sort_list(json_list)
-    x = txt.find(".")
+    # separator =
+    x = txt.find(". ")
     json_sublist = []
-    [frase, documento] = prendo_frase_fino_a(txt, x)
+    [frase, txt] = prendo_frase_fino_a(txt, x) #separator len
     [json_sublist, json_list] = prendo_labels_fino_a(json_list, x)
     '''print(x) #char index
     print(frase)
@@ -56,17 +49,20 @@ def recursive_select(json_list, txt):
     print(json_list)'''
     if x != -1:
         a.append([frase, json_sublist])
-        recursive_select(json_list, documento)
-    return
+    return x, json_list, txt
 
-
+#dividing document "i" in periods
 a = []
 txt = "Hello. Welcome. Sit down. "
 json_list = [[0, 5, "p1"], [7, 14, "p2"], [16, 19, "p3w1"], [20, 24, "p3w2"]]
-recursive_select(json_list, txt)
+sort_list(json_list)
+found = 0
+while found!=-1:
+    found, json_list, txt = period_sect(json_list, txt, a)
 print("-----")
 print(a)
 
+#initialization of automata
 soa_classifiche = ['I', 'II', 'III-bis', 'IV', 'IV-bis', 'V', 'VI', 'VII', 'VIII']
 soa_categorie = ['OG-1', 'OG-2', 'OG-3', 'OG-4', 'OG-5', 'OG-6', 'OG-7', 'OG-8', 'OG-9', 'OG-10',
                  'OG-11', 'OG-12', 'OG-13', 'OS-1', 'OS-2A', 'OS-2B', 'OS-3', 'OS-4', 'OS-5', 'OS-6',
@@ -78,10 +74,11 @@ label_list = soa_categorie + soa_classifiche
 # creating object of the class
 obj_list = []
 for label in label_list:
-    new_obj = labelledObj(label)
+    new_obj = DistributionAutomaton(label)
     obj_list.append(new_obj)
+'''
 for obj in obj_list:
-    obj.print_label()
-    obj.print_list()
-
+    print(obj.get_label())
+    print(obj.read_decision())
+'''
 
