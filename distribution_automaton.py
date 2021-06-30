@@ -1,12 +1,12 @@
-from automata.fa.dfa import DFA
-
-
-class Distribution_automaton:
+class DistributionAutomaton:
     # default constructor
     # DFA which matches all binary strings ending in an odd number of '1's
     def __init__(self, label=""):
         self.label = label
         self.count = 0
+
+    def get_label(self):
+        return self.label
 
     def label_increase(self):
         self.count = self.count + 1
@@ -40,7 +40,7 @@ class Distribution_automaton:
         return decision
 
 
-autom = Distribution_automaton()
+autom = DistributionAutomaton()
 
 
 autom.label_increase()
