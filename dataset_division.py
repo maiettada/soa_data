@@ -1,4 +1,4 @@
-from distribution_automaton import DistributionAutomaton
+
 
 def sort_list(lis):
     lis.sort(key=lambda x: x[0])
@@ -62,7 +62,8 @@ while found!=-1:
 print("-----")
 print(a)
 
-#initialization of automata
+from distribution_automaton import DistributionAutomaton
+
 soa_classifiche = ['I', 'II', 'III-bis', 'IV', 'IV-bis', 'V', 'VI', 'VII', 'VIII']
 soa_categorie = ['OG-1', 'OG-2', 'OG-3', 'OG-4', 'OG-5', 'OG-6', 'OG-7', 'OG-8', 'OG-9', 'OG-10',
                  'OG-11', 'OG-12', 'OG-13', 'OS-1', 'OS-2A', 'OS-2B', 'OS-3', 'OS-4', 'OS-5', 'OS-6',

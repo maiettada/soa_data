@@ -13,7 +13,9 @@ with open('gold.json1', 'r') as fp:
         random_value = random.random()
         item = json.loads(line)
    
-        # crea un nuovo documento
+        #TODO
+        #crea un nuovo documento: ogni documento è derivato da una frase
+        #period_sect
         doc = nlp.make_doc(item['text'])
 
         entities = []
@@ -33,6 +35,12 @@ with open('gold.json1', 'r') as fp:
             # se fallisce perché le etichette non sono valide ignora il documento
             continue
 
+        #TODO
+        #sostituisci il random_value con l'automaton_value
+        # E SE UNA FRASE AVESSE PIÙ DI UNA LABEL?
+        # I approccio: vale la decisione di una delle labels(la prima??per semplicità)
+        # II approccio: boh, fare complesse valutazioni contando le decisioni di un tipo e di un altro
+        #               priorità alta alla decisione "train", media alla decisione "test", bassa alla decisione "dev"
         if random_value < 0.7:
             # 70% degli esempi nel training set
             train.add(doc)
