@@ -39,6 +39,7 @@ class DistributionAutomaton:
             decision = 0
         return decision
 
+    train_decision=2
 
 autom = DistributionAutomaton()
 
