@@ -47,8 +47,7 @@ def period_sect(json_list, txt, a):
     print(json_sublist)
     print(documento)
     print(json_list)'''
-    if x != -1:
-        a.append([frase, json_sublist])
+    a.append([frase, json_sublist])
     return x, json_list, txt
 
 #dividing document "i" in periods

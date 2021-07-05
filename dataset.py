@@ -70,23 +70,23 @@ with open('gold-debug.json1', 'r') as fp:
                 # label[2] -> nome dell'etichetta
                 span = doc.char_span(label[0], label[1], label=label[2], alignment_mode="contract")
                 entities.append(span)
-            try:
-                # prova ad assegnare le etichette al documento
-                doc.ents = entities
-                for obj in obj_list:
-                    if obj.get_label()==label[2]:
-                        break; #assuming json files are using correct labels!!
-                decision = obj.read_decision('1')
-                if decision == DistributionAutomaton.train_decision:
-                    train_decided = True
-                elif decision == DistributionAutomaton.test_decision:
-                    test_decided = True
-                else:
-                    #implicitly dev_decided= True
-                    pass
-            except:
-                # se fallisce perché le etichette non sono valide ignora il documento
-                continue
+                try:
+                    # prova ad assegnare le etichette al documento
+                    doc.ents = entities
+                    for obj in obj_list:
+                        if obj.get_label()==label[2]:
+                            break; #assuming json files are using correct labels!!
+                    decision = obj.read_decision('1')
+                    if decision == DistributionAutomaton.train_decision:
+                        train_decided = True
+                    elif decision == DistributionAutomaton.test_decision:
+                        test_decided = True
+                    else:
+                        #implicitly dev_decided= True
+                        pass
+                except:
+                    # se fallisce perché le etichette non sono valide ignora il documento
+                    continue
         #sostituisci il random_value con l'automaton_value
         # E SE UNA FRASE AVESSE PIÙ DI UNA LABEL?
         # I approccio: vale la decisione di una delle labels(la prima??per semplicità)
