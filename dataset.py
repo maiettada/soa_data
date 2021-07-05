@@ -33,17 +33,17 @@ for obj in obj_list:
 '''
 
 
-with open('gold.json1', 'r') as fp:
+with open('gold-debug.json1', 'r') as fp:
     sentences_labels_list = []
     for line in fp.readlines():
         item = json.loads(line)
-        txt = item['text']
-        json_list = item['labels']
-        sort_list(json_list)
+        txt_base = item['text']
+        json_list_base = item['labels']
+        sort_list(json_list_base)
         found = 0
         while found != -1:
             # crea un nuovo documento: ogni documento è derivato da una frase
-            found, json_list, txt = period_sect(json_list, txt, sentences_labels_list)
+            found, json_list_base, txt_base = period_sect(json_list_base, txt_base, sentences_labels_list)
         #END OF PREPROCESSING
     for txt, json_list in sentences_labels_list:
         doc = nlp.make_doc(txt)
@@ -53,16 +53,16 @@ with open('gold.json1', 'r') as fp:
         # legge le etichette
         if not json_list:
             for obj in obj_list:
-                if obj.get_label() == '':
+                if obj.get_label() == "":
                     break;
-                decision = obj.read_decision('1')
-                if decision == DistributionAutomaton.train_decision:
-                    train_decided = True
-                elif decision == DistributionAutomaton.test_decision:
-                    test_decided = True
-                else:
-                    # implicitly dev_decided= True
-                    pass
+            decision = obj.read_decision('1')
+            if decision == DistributionAutomaton.train_decision:
+                train_decided = True
+            elif decision == DistributionAutomaton.test_decision:
+                test_decided = True
+            else:
+                # implicitly dev_decided= True
+                pass
         else:
             for label in json_list:
                 # label[0] -> carattere di inizio
@@ -76,14 +76,14 @@ with open('gold.json1', 'r') as fp:
                 for obj in obj_list:
                     if obj.get_label()==label[2]:
                         break; #assuming json files are using correct labels!!
-                    decision = obj.read_decision('1')
-                    if decision == DistributionAutomaton.train_decision:
-                        train_decided = True
-                    elif decision == DistributionAutomaton.test_decision:
-                        test_decided = True
-                    else:
-                        #implicitly dev_decided= True
-                        pass
+                decision = obj.read_decision('1')
+                if decision == DistributionAutomaton.train_decision:
+                    train_decided = True
+                elif decision == DistributionAutomaton.test_decision:
+                    test_decided = True
+                else:
+                    #implicitly dev_decided= True
+                    pass
             except:
                 # se fallisce perché le etichette non sono valide ignora il documento
                 continue
