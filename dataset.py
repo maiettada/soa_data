@@ -32,6 +32,8 @@ for obj in obj_list:
     print(obj.read_decision())
 '''
 
+# tested with gold-debug.json1 = {"id": 71379, "text": "nel paese di OS7 e OS8.", "labels": [[13, 16, "OS-7"], [19, 22, "OS-8"]]}
+
 
 with open('gold-debug.json1', 'r') as fp:
     sentences_labels_list = []
@@ -73,6 +75,7 @@ with open('gold-debug.json1', 'r') as fp:
                 try:
                     # prova ad assegnare le etichette al documento
                     doc.ents = entities
+                    print(doc.ents)
                     for obj in obj_list:
                         if obj.get_label()==label[2]:
                             break; #assuming json files are using correct labels!!
