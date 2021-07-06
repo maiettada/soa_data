@@ -75,7 +75,7 @@ with open('gold-debug.json1', 'r') as fp:
                 try:
                     # prova ad assegnare le etichette al documento
                     doc.ents = entities
-                    print(doc.ents)
+                    print(doc.ents, json_list)
                     for obj in obj_list:
                         if obj.get_label()==label[2]:
                             break; #assuming json files are using correct labels!!
