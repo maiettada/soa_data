@@ -47,9 +47,14 @@ with open('gold-debug.json1', 'r') as fp:
             # crea un nuovo documento: ogni documento è derivato da una frase
             found, json_list_base, txt_base = period_sect(json_list_base, txt_base, sentences_labels_list)
         #END OF PREPROCESSING
+    # to be initialised once initially
+    entities = []
+    train_documentation = []
+    test_documentation = []
+    dev_documentation = []
     for txt, json_list in sentences_labels_list:
+        # to be initialised for every couple (txt, json_list)
         doc = nlp.make_doc(txt)
-        entities = []
         train_decided = False
         test_decided = False
         # legge le etichette
@@ -82,10 +87,13 @@ with open('gold-debug.json1', 'r') as fp:
                     decision = obj.read_decision('1')
                     if decision == DistributionAutomaton.train_decision:
                         train_decided = True
+                        train_documentation.append(label[2])
                     elif decision == DistributionAutomaton.test_decision:
                         test_decided = True
+                        test_documentation.append(label[2])
                     else:
                         #implicitly dev_decided= True
+                        dev_documentation.append(label[2])
                         pass
                 except:
                     # se fallisce perché le etichette non sono valide ignora il documento
