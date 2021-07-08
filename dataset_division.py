@@ -30,8 +30,18 @@ def prendo_labels_fino_a(json_list, char_index):
                      end > char_index]
     return [selection, remaining]
 
+import sys, os
 
-def period_sect(json_list, txt, a):
+# Disable
+def blockPrint():
+    sys.stdout = open(os.devnull, 'w')
+
+# Restore
+def enablePrint():
+    sys.stdout = sys.__stdout__
+
+
+def period_sect(json_list, txt, a_list_of_json_txt_pair):
     """
 
     :param json_list:
@@ -40,6 +50,7 @@ def period_sect(json_list, txt, a):
     """
     # = int(input('Enter a number: '))
     # separator =
+    blockPrint()
     x = txt.find(". ")
     json_sublist = []
     [frase, txt] = prendo_frase_fino_a(txt, x) #separator len
@@ -52,32 +63,35 @@ def period_sect(json_list, txt, a):
     print(json_sublist)
     print(documento)
     print(json_list)'''
-    a.append([frase, json_sublist])
+    a_list_of_json_txt_pair.append([frase, json_sublist])
+    enablePrint()
     return x, json_list, txt
 
-#dividing document "i" in periods
-# trivial case: every sentence is labelled
-a = []
-txt = "Hello. Welcome. Sit down. "
-json_list = [[0, 5, "p1"], [7, 14, "p2"], [16, 19, "p3w1"], [20, 24, "p3w2"]]
-sort_list(json_list)
-found = 0
-while found!=-1:
-    found, json_list, txt = period_sect(json_list, txt, a)
-print("-----")
-print("-----")
-print("-----")
-print(a)
-#dividing document "i" in periods
-# trivial case: every sentence is labelled
-a = []
-txt = "Hello Paperino. Welcome Minnieee. Sit down Topolino. "
-json_list = [[6,14, "paperino"], [24,32, "minnie"], [43, 51, "topolino"]]
-sort_list(json_list)
-found = 0
-while found!=-1:
-    found, json_list, txt = period_sect(json_list, txt, a)
-print("-----")
-print(a)
+def debug_dataset_division():
+    #dividing document "i" in periods
+    # trivial case: every sentence is labelled
+    a = []
+    txt = "Hello. Welcome. Sit down. "
+    json_list = [[0, 5, "p1"], [7, 14, "p2"], [16, 19, "p3w1"], [20, 24, "p3w2"]]
+    sort_list(json_list)
+    found = 0
+    while found!=-1:
+        found, json_list, txt = period_sect(json_list, txt, a)
+    print("-----")
+    print("-----")
+    print("-----")
+    print(a)
+    #dividing document "i" in periods
+    # trivial case: every sentence is labelled
+    a = []
+    txt = "Hello Paperino. Welcome Minnieee. Sit down Topolino. "
+    json_list = [[6,14, "paperino"], [24,32, "minnie"], [43, 51, "topolino"]]
+    sort_list(json_list)
+    found = 0
+    while found!=-1:
+        found, json_list, txt = period_sect(json_list, txt, a)
+    print("-----")
+    print(a)
+    return
 
 

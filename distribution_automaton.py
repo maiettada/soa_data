@@ -41,21 +41,18 @@ class DistributionAutomaton:
 
     train_decision = 0
     test_decision = 1
-
-autom = DistributionAutomaton()
-
-
-autom.label_increase()
-print(autom.read_decision()) # decision: insert into train set
-
-autom.label_increase()
-print(autom.read_decision()) # decision: insert into dev set
-
-#equivale a increase+read_decision()
-print(autom.read_decision('1')) # decision: insert into test set
-
-#insert 7 more to complete the distribution
-print(autom.read_decision('1111111')) # decision: insert into test set
+    dev_decision = 2
 
 
-print("How many distributions were completed?", autom.how_many_distributions())
+def debug_distribution_automaton():
+    autom = DistributionAutomaton()
+    autom.label_increase()
+    print(autom.read_decision()) # decision: insert into train set
+    autom.label_increase()
+    print(autom.read_decision()) # decision: insert into dev set
+    #equivale a increase+read_decision()
+    print(autom.read_decision('1')) # decision: insert into test set
+    #insert 7 more to complete the distribution
+    print(autom.read_decision('1111111')) # decision: insert into test set
+    print("How many distributions were completed?", autom.how_many_distributions())
+    return
