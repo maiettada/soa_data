@@ -1,7 +1,7 @@
 import spacy
 import json
 from spacy.tokens import DocBin
-from dataset_division import period_sect,sort_list
+from dataset_division import period_sect, sort_list
 from distribution_automaton import DistributionAutomaton
 from soa_data import soa_classifiche, soa_categorie
 
@@ -62,7 +62,8 @@ def decide_for_single_label(decision, train_decided, test_decided, label=""):
     return train_decided, test_decided
 
 
-def add_to_decided_bin(doc, train, dev, test, train_decided, test_decided, train_documentation, dev_documentation, test_documentation, labels_list, appending_to_test_list):
+def add_to_decided_bin(doc, train, dev, test, train_decided, test_decided, train_documentation, dev_documentation,
+                       test_documentation, labels_list, appending_to_test_list):
     """
     The procedure assigns a doc to the proper train/dev/test DocBin; since train/dev/test doc-bins need a 70% - 10 % - 20% of the label instances,
     for every label an automaton object decided "train" or "test" ( or other, i.e. dev).
@@ -133,7 +134,7 @@ def decide_where_to_put(txt, labels_list, train_documentation, dev_documentation
         # legge le etichette
         print()
         print("(json_list)", '\n', labels_list)
-        #decide for empty json_list
+        # decide for empty json_list
         for label_element in labels_list:
             # label_element[0] -> starting character
             # label_element[1] -> ending character
@@ -142,14 +143,15 @@ def decide_where_to_put(txt, labels_list, train_documentation, dev_documentation
             unsafe_entities_local.append(span)
             unsafe_entities_local_debug.append(label_element)
             try:
-                #here the error can arise
+                # here the error can arise
                 doc.ents = unsafe_entities_local
                 obj = retrieve_obj_by_label(label_element[2])
                 obj.label_increase()
                 decision = obj.read_decision()
                 # previously: random approach
                 # now: priority approach; prior choice is the train_decision, then test_decision, then dev
-                train_decided, test_decided = decide_for_single_label(decision, train_decided, test_decided, label_element[2])
+                train_decided, test_decided = decide_for_single_label(decision, train_decided, test_decided,
+                                                                      label_element[2])
                 print("ok - stored into safe")
             except:
                 # last label is giving error; we just pop it
@@ -186,7 +188,6 @@ def process_json1(obj_list, train, dev, test, train_documentation, test_document
     return
 
 
-
 nlp = spacy.blank("it")
 train = DocBin()
 dev = DocBin()
@@ -205,5 +206,3 @@ process_json1(obj_list, train, dev, test, train_documentation, test_documentatio
 train.to_disk("./train.spacy")
 dev.to_disk("./dev.spacy")
 test.to_disk("./test.spacy")
-
-
