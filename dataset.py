@@ -8,9 +8,11 @@ from soa_data import soa_classifiche, soa_categorie
 
 def read_json1_and_sect_by_period(fp, sentences_labels_list):
     """
+    preprocessing: this procedure takes the json1 file, reads each line;
+    for each line, moreover, sectioning in sentences is executed to permit later analysis at sentence level.
 
     :param fp:
-    :param sentences_labels_list:
+    :param sentences_labels_list: list to be filled with pairs ((sentence),[[label_1],[label_2]...[label_n]])
     :return:
     """
     for line in fp.readlines():
@@ -22,12 +24,12 @@ def read_json1_and_sect_by_period(fp, sentences_labels_list):
         while found != -1:
             # crea un nuovo documento: ogni documento è derivato da una frase
             found, json_list_base, txt_base = period_sect(json_list_base, txt_base, sentences_labels_list)
-        # END OF PREPROCESSING
     return
 
 
 def retrieve_obj_by_label(label: str):
     """
+    Helper function to quickly select the automaton for the specified label
 
     :param label:
     :return:
@@ -65,8 +67,7 @@ def add_to_decided_bin(doc, train, dev, test, train_decided, test_decided, train
     The procedure assigns a doc to the proper train/dev/test DocBin; since train/dev/test doc-bins need a 70% - 10 % - 20% of the label instances,
     for every label an automaton object decided "train" or "test" ( or other, i.e. dev).
     The doc can have more than one labels, so the decision is the following:
-    train_decide flag True, the doc with all its labels is sent to the "train" doc-bin;
-    test_decide flag False, then the test_decide flag could send the doc+labels to the "test" doc-bin;
+    train_decide has high priority; then, test_decide has medium priority; just
     if both train_decide and test_decide are false, then the doc is sent to the "dev" doc-bin.
 
     :param doc: spacy document data structure
@@ -83,19 +84,19 @@ def add_to_decided_bin(doc, train, dev, test, train_decided, test_decided, train
     :return:
     """
     if train_decided:
-        # 70% degli esempi nel training set
+        # 70% to the training set
         train.add(doc)
         if appending_to_test_list:
             train_documentation.append(labels_list)
         print("train bin will get labels: ", labels_list)
     elif test_decided:
-        # 20% degli esempi nel test set
+        # 20% to the test set
         test.add(doc)
         if appending_to_test_list:
             test_documentation.append(labels_list)
         print("test bin will get labels: ", labels_list)
     else:
-        # 10% degli esempi nel dev set
+        # 10% to the dev set
         dev.add(doc)
         if appending_to_test_list:
             dev_documentation.append(labels_list)
@@ -126,41 +127,32 @@ def decide_where_to_put(txt, labels_list, train_documentation, dev_documentation
         obj.label_increase()
         decision = obj.read_decision()
         train_decided, test_decided = decide_for_single_label(decision, train_decided, test_decided)
-        '''        
         add_to_decided_bin(doc, train, dev, test, train_decided, test_decided, train_documentation, dev_documentation,
-                           test_documentation, unsafe_entities_local_debug, True)
-            '''
+                           test_documentation, unsafe_entities_local_debug, False)
     else:
         # legge le etichette
         print()
         print("(json_list)", '\n', labels_list)
         #decide for empty json_list
         for label_element in labels_list:
-            # label_element[0] -> carattere di inizio
-            # label_element[1] -> carattere di fine
-            # label_element[2] -> nome dell'etichetta
+            # label_element[0] -> starting character
+            # label_element[1] -> ending character
+            # label_element[2] -> label
             span = doc.char_span(label_element[0], label_element[1], label=label_element[2], alignment_mode="contract")
             unsafe_entities_local.append(span)
             unsafe_entities_local_debug.append(label_element)
             try:
-                # prova ad assegnare le etichette al documento
-                #PREFERISCO far scoppiare l'errore sulla singola ultima label
+                #here the error can arise
                 doc.ents = unsafe_entities_local
-                # decisione ( prima era sopra al try)
                 obj = retrieve_obj_by_label(label_element[2])
                 obj.label_increase()
                 decision = obj.read_decision()
+                # previously: random approach
+                # now: priority approach; prior choice is the train_decision, then test_decision, then dev
                 train_decided, test_decided = decide_for_single_label(decision, train_decided, test_decided, label_element[2])
                 print("ok - stored into safe")
-                # sostituisco l'approccio random_value con l'automaton_value
-                # E SE UNA FRASE AVESSE PIÙ DI UNA LABEL?
-                # I approccio: vale la decisione di una delle labels(la prima??per semplicità)
-                # II approccio: priorità alta alla decisione "train", media alla decisione "test", bassa alla decisione "dev"
-                if label_element[2]=='OS-30':
-                    print("very close")
             except:
-                # se fallisce: l'ultima delle etichette di json_list non era valida
-                # si espelle l'ultima etichetta, si arresta l'elaborazione di json_list
+                # last label is giving error; we just pop it
                 unsafe_entities_local.pop()
                 unsafe_entities_local_debug.pop()
                 doc.ents = unsafe_entities_local
@@ -189,11 +181,8 @@ def process_json1(obj_list, train, dev, test, train_documentation, test_document
         sentences_labels_list = []
         read_json1_and_sect_by_period(fp, sentences_labels_list)
         # now sentences_labels_list has the pairs (txt, json_list)
-        # to be initialised once initially
         for txt, json_list in sentences_labels_list:
-            # to be initialised for every couple (txt, json_list)
-            if json_list: #just for debugging: TO BE REMOVED
-                decide_where_to_put(txt, json_list, train_documentation, dev_documentation, test_documentation)
+            decide_where_to_put(txt, json_list, train_documentation, dev_documentation, test_documentation)
     return
 
 
@@ -206,7 +195,7 @@ train_documentation = []
 test_documentation = []
 dev_documentation = []
 soa_values_list = soa_categorie + soa_classifiche
-# creating object of the class
+# creating objects of the class distributionAutomaton
 obj_list = []
 for label in soa_values_list:
     new_obj = DistributionAutomaton(label)

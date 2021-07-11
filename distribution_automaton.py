@@ -5,6 +5,10 @@ class DistributionAutomaton:
         self.label = label
         self.count = 0
 
+    train_decision = 0
+    test_decision = 2
+    dev_decision = 1
+
     def get_label(self):
         return self.label
 
@@ -14,15 +18,20 @@ class DistributionAutomaton:
     def how_many_distributions(self):
         return self.count/10
 
-    def read_decision(self, input=''):
-        for ch in input:
-            if ch == "1":
-                self.label_increase()
-        """returns 0 meaning put into train set  (desired size 70%),
-                   1 meaning put into dev set    (desired size 10%),
-                   or
-                   2 meaning put into test set   (desired size 20%)
+    def read_decision(self, input: int = 0):
         """
+        Outputs a decision of the automaton
+
+        :param input:
+        :return:    0 ("train_decision"), meaning put into train set  (desired size 70%),
+                    1 ("dev_decision") , meaning put into dev set    (desired size 10%),
+                    2 ("test_decision"), meaning put into test set   (desired size 20%)
+
+
+        :rtype: object
+        """
+        for i in range(input):
+            self.label_increase()
         state = self.count % 10
         decision = 0
         if state == 1:
@@ -39,10 +48,6 @@ class DistributionAutomaton:
             decision = 0
         return decision
 
-    train_decision = 0
-    test_decision = 1
-    dev_decision = 2
-
 
 def debug_distribution_automaton():
     autom = DistributionAutomaton()
@@ -51,8 +56,11 @@ def debug_distribution_automaton():
     autom.label_increase()
     print(autom.read_decision()) # decision: insert into dev set
     #equivale a increase+read_decision()
-    print(autom.read_decision('1')) # decision: insert into test set
+    print(autom.read_decision(1)) # decision: insert into test set
     #insert 7 more to complete the distribution
-    print(autom.read_decision('1111111')) # decision: insert into test set
+    print(autom.read_decision(7)) # decision: insert into train set
     print("How many distributions were completed?", autom.how_many_distributions())
     return
+
+
+debug_distribution_automaton()
