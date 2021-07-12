@@ -4,6 +4,7 @@ from spacy.tokens import DocBin
 from dataset_division import period_sect, sort_list
 from distribution_automaton import DistributionAutomaton
 from soa_data import soa_classifiche, soa_categorie
+import random
 
 
 def read_json1_and_sect_by_period(fp, sentences_labels_list):
@@ -111,6 +112,34 @@ def make_unique_list(labels_list):
     return labels_consider_just_once
 
 
+def automata_decide_listwise(labels_list):
+    train_decided, test_decided = [False, False]
+    labels_list = [x[2] for x in labels_list]
+    labels_consider_just_once = make_unique_list(labels_list)
+    for label_string in labels_consider_just_once:
+        obj = retrieve_obj_by_label(label_string)
+        obj.label_increase()
+        decision = obj.read_decision()
+        train_decided, test_decided = decide_for_single_label(decision, train_decided, test_decided,
+                                                              label_string)
+    return train_decided, test_decided
+
+
+def randomly_decide():
+    random_value = random.random()
+    train_decided, test_decided = False, False
+    if random_value < 0.7:
+        # 70% samples into training set
+        train_decided = True
+    elif random_value < 0.8:
+        # 10% samples into training set dev set
+        pass
+    else:
+        # 20% samples into training set test set
+        test_decided = True
+    return train_decided, test_decided
+
+
 def decide_where_to_put(txt, labels_list, train_documentation, dev_documentation, test_documentation):
     """
     This function does two things:
@@ -154,18 +183,11 @@ def decide_where_to_put(txt, labels_list, train_documentation, dev_documentation
                 unsafe_entities_local_debug.pop()
                 doc.ents = unsafe_entities_local
                 print("exception- forgetting problematic label")
-    labels_list = [x[2] for x in labels_list]
-    labels_consider_just_once = make_unique_list(labels_list)
-    for label_string in labels_consider_just_once:
-        obj = retrieve_obj_by_label(label_string)
-        obj.label_increase()
-        decision = obj.read_decision()
-        # previously: random approach; now: priority approach: prior choice is the train_decision, then test_decision, then dev
-        train_decided, test_decided = decide_for_single_label(decision, train_decided, test_decided,
-                                                              label_string)
-        print("ok - stored into safe")
-        add_to_decided_bin(doc, train, dev, test, train_decided, test_decided, train_documentation, dev_documentation,
-                           test_documentation, unsafe_entities_local_debug, labels_present)
+    #train_decided, test_decided = randomly_decide()
+    train_decided, test_decided = automata_decide_listwise(labels_list)
+    print("ok - stored into safe")
+    add_to_decided_bin(doc, train, dev, test, train_decided, test_decided, train_documentation, dev_documentation,
+                       test_documentation, unsafe_entities_local_debug, labels_present)
     return
 
 

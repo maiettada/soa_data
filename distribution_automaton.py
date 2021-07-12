@@ -40,15 +40,11 @@ class DistributionAutomaton:
         state = self.count % 10
         decision = 0
         if state == 1:
-            decision = 0
+            decision = 2
         elif state == 2:
-            decision = 1
+            decision = 2
         elif state == 3:
-            decision = 2
-        elif state == 4:
-            decision = 0
-        elif state == 5:
-            decision = 2
+            decision = 1
         else:
             decision = 0
         return decision
