@@ -4,6 +4,7 @@ class DistributionAutomaton:
     def __init__(self, label=""):
         self.label = label
         self.count = 0
+        self.used = False
 
     train_decision = 0
     test_decision = 2
@@ -13,7 +14,11 @@ class DistributionAutomaton:
         return self.label
 
     def label_increase(self):
+        self.used = True
         self.count = self.count + 1
+
+    def is_it_used(self):
+        return self.used
 
     def how_many_distributions(self):
         return self.count/10

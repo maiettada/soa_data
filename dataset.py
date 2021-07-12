@@ -105,6 +105,12 @@ def add_to_decided_bin(doc, train, dev, test, train_decided, test_decided, train
     return
 
 
+def make_unique_list(labels_list):
+    used = []
+    labels_consider_just_once = [x for x in labels_list if x not in used and (used.append(x) or True)]
+    return labels_consider_just_once
+
+
 def decide_where_to_put(txt, labels_list, train_documentation, dev_documentation, test_documentation):
     """
     This function does two things:
@@ -123,45 +129,43 @@ def decide_where_to_put(txt, labels_list, train_documentation, dev_documentation
     doc = nlp.make_doc(txt)
     train_decided = False
     test_decided = False
+    labels_present = False
     if not labels_list:
-        obj = retrieve_obj_by_label("")
-        obj.label_increase()
-        decision = obj.read_decision()
-        train_decided, test_decided = decide_for_single_label(decision, train_decided, test_decided)
-        add_to_decided_bin(doc, train, dev, test, train_decided, test_decided, train_documentation, dev_documentation,
-                           test_documentation, unsafe_entities_local_debug, False)
+        empty_label = ""
+        labels_list= [[None, None, empty_label]]
+        # recovered the lack of label by faking a "" label ( even docs without labels must be distributed to bins)
     else:
-        # legge le etichette
-        print()
-        print("(json_list)", '\n', labels_list)
+        labels_present = True
+        print('\n', "(json_list)", '\n', labels_list)
         # decide for empty json_list
         for label_element in labels_list:
-            # label_element[0] -> starting character
-            # label_element[1] -> ending character
-            # label_element[2] -> label
-            span = doc.char_span(label_element[0], label_element[1], label=label_element[2], alignment_mode="contract")
+            span = doc.char_span(label_element[0],        # -> starting character
+                                 label_element[1],        # -> ending character
+                                 label=label_element[2],  # -> label
+                                 alignment_mode="contract")
             unsafe_entities_local.append(span)
             unsafe_entities_local_debug.append(label_element)
             try:
                 # here the error can arise
                 doc.ents = unsafe_entities_local
-                obj = retrieve_obj_by_label(label_element[2])
-                obj.label_increase()
-                decision = obj.read_decision()
-                # previously: random approach
-                # now: priority approach; prior choice is the train_decision, then test_decision, then dev
-                train_decided, test_decided = decide_for_single_label(decision, train_decided, test_decided,
-                                                                      label_element[2])
-                print("ok - stored into safe")
             except:
                 # last label is giving error; we just pop it
                 unsafe_entities_local.pop()
                 unsafe_entities_local_debug.pop()
                 doc.ents = unsafe_entities_local
                 print("exception- forgetting problematic label")
+    labels_list = [x[2] for x in labels_list]
+    labels_consider_just_once = make_unique_list(labels_list)
+    for label_string in labels_consider_just_once:
+        obj = retrieve_obj_by_label(label_string)
+        obj.label_increase()
+        decision = obj.read_decision()
+        # previously: random approach; now: priority approach: prior choice is the train_decision, then test_decision, then dev
+        train_decided, test_decided = decide_for_single_label(decision, train_decided, test_decided,
+                                                              label_string)
+        print("ok - stored into safe")
         add_to_decided_bin(doc, train, dev, test, train_decided, test_decided, train_documentation, dev_documentation,
-                           test_documentation, unsafe_entities_local_debug, True)
-
+                           test_documentation, unsafe_entities_local_debug, labels_present)
     return
 
 
@@ -203,6 +207,7 @@ for label in soa_values_list:
     obj_list.append(new_obj)
 # tested with gold-debug.json1 = {"id": 71379, "text": "nel paese di OS7 e OS8.", "labels": [[13, 16, "OS-7"], [19, 22, "OS-8"]]}
 process_json1(obj_list, train, dev, test, train_documentation, test_documentation, dev_documentation)
+print("total #values:", len(soa_values_list), "#labels activated: ",len([x.is_it_used() for x in obj_list if x.is_it_used()==True]))
 train.to_disk("./train.spacy")
 dev.to_disk("./dev.spacy")
 test.to_disk("./test.spacy")
