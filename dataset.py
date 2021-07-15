@@ -7,24 +7,33 @@ from soa_data import soa_classifiche, soa_categorie
 import random
 
 
-def read_json1_and_sect_by_period(fp, sentences_labels_list):
+def read_json1_and_sect_by_period(fp, sentences_labels_list, n_lines=-1):
     """
     preprocessing: this procedure takes the json1 file, reads each line;
     for each line, moreover, sectioning in sentences is executed to permit later analysis at sentence level.
 
     :param fp:
     :param sentences_labels_list: list to be filled with pairs ((sentence),[[label_1],[label_2]...[label_n]])
+    :param n_lines: max #lines to be partitioned in sentences
     :return:
     """
+    divide = True
     for line in fp.readlines():
         item = json.loads(line)
         txt_base = item['text']
         json_list_base = item['labels']
         sort_list(json_list_base)
         found = 0
+        if n_lines > 0:
+            n_lines = n_lines -1
+            divide = True
+        elif n_lines == 0:
+            divide = False
+        else:
+            pass   #n_lines=-1, NO MAXIMUM
         while found != -1:
             # crea un nuovo documento: ogni documento è derivato da una frase
-            found, json_list_base, txt_base = period_sect(json_list_base, txt_base, sentences_labels_list)
+            found, json_list_base, txt_base = period_sect(json_list_base, txt_base, sentences_labels_list, divide)
     return
 
 
@@ -205,9 +214,9 @@ def process_json1(obj_list, train, dev, test, train_documentation, test_document
     :param dev_documentation: (for debugging purposes) will contain labels-lists that are added into dev docbin;
     :return:
     """
-    with open('gold-debug.json1', 'r') as fp:
+    with open('gold.json1', 'r') as fp:
         sentences_labels_list = []
-        read_json1_and_sect_by_period(fp, sentences_labels_list)
+        read_json1_and_sect_by_period(fp, sentences_labels_list, 90)
         # now sentences_labels_list has the pairs (txt, json_list)
         for txt, json_list in sentences_labels_list:
             decide_where_to_put(txt, json_list, train_documentation, dev_documentation, test_documentation)
@@ -230,6 +239,9 @@ for label in soa_values_list:
 # tested with gold-debug.json1 = {"id": 71379, "text": "nel paese di OS7 e OS8.", "labels": [[13, 16, "OS-7"], [19, 22, "OS-8"]]}
 process_json1(obj_list, train, dev, test, train_documentation, test_documentation, dev_documentation)
 print("total #values:", len(soa_values_list), "#labels activated: ",len([x.is_it_used() for x in obj_list if x.is_it_used()==True]))
+print("#completed distr in the automata documents: ",len([x.how_many_distributions() for x in obj_list
+                                                          if x.how_many_distributions() >= 1]))
+print([(x.get_label(), x.how_many_distributions()) for x in obj_list])
 train.to_disk("./train.spacy")
 dev.to_disk("./dev.spacy")
 test.to_disk("./test.spacy")

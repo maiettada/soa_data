@@ -58,7 +58,7 @@ def enable_print():
     sys.stdout = sys.__stdout__
 
 
-def period_sect(labels_list, txt, labels_txt_list):
+def period_sect(labels_list, txt, labels_txt_list, divide=True):
     """
     This function divides a big [txt, labels_list] data structure in
     a proper list [[sentence1,labels_list1],...,[sentence_n,labels_list_n]]
@@ -68,16 +68,19 @@ def period_sect(labels_list, txt, labels_txt_list):
     :return: [ending_condition, list, txt], where ending_condition is actually the char index;
     the document was completely sectioned if ending_condition = -1
     """
-    block_print()
-    x = txt.find(". ")
-    sublist = []
-    [frase, txt] = prendo_frase_fino_a(txt, x) #separator len
-    print(frase,"||,", txt)
-    [sublist, labels_list] = prendo_labels_fino_a(labels_list, x)
-    print(sublist,"||,", labels_list)
-    print()
-    labels_txt_list.append([frase, sublist])
-    enable_print()
+    if divide:
+        block_print()
+        x = txt.find(". ")
+        sublist = []
+        [frase, txt] = prendo_frase_fino_a(txt, x) #separator len
+        print(frase,"||,", txt)
+        [sublist, labels_list] = prendo_labels_fino_a(labels_list, x)
+        print(sublist,"||,", labels_list)
+        print()
+        labels_txt_list.append([frase, sublist])
+        enable_print()
+    else:
+        x = -1
     return x, labels_list, txt
 
 
