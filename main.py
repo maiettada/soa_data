@@ -185,6 +185,6 @@ for label_subcategory in evaluation_subcategory_lists:
                                                                               loaded_labelled_data, label_subcategory)
 for label_subcategory in evaluation_subcategory_lists:
     to_output_file(str(label_subcategory) +
-                   " results\n: " +
-                   str(results[evaluation_subcategory_lists.index(label_subcategory)]) +
+                   " results:\n " +
+                   json.dumps(results[evaluation_subcategory_lists.index(label_subcategory)]) +
                    "\n\n")

@@ -192,8 +192,8 @@ def decide_where_to_put(txt, labels_list, train_documentation, dev_documentation
                 unsafe_entities_local_debug.pop()
                 doc.ents = unsafe_entities_local
                 print("exception- forgetting problematic label")
-    #train_decided, test_decided = randomly_decide()
-    train_decided, test_decided = automata_decide_listwise(labels_list)
+    train_decided, test_decided = randomly_decide()
+    #train_decided, test_decided = automata_decide_listwise(labels_list)
     print("ok - stored into safe")
     add_to_decided_bin(doc, train, dev, test, train_decided, test_decided, train_documentation, dev_documentation,
                        test_documentation, unsafe_entities_local_debug, labels_present)
@@ -216,7 +216,7 @@ def process_json1(obj_list, train, dev, test, train_documentation, test_document
     """
     with open('gold.json1', 'r') as fp:
         sentences_labels_list = []
-        read_json1_and_sect_by_period(fp, sentences_labels_list, 90)
+        read_json1_and_sect_by_period(fp, sentences_labels_list, 70)  # -1: everything must be cut into sentences
         # now sentences_labels_list has the pairs (txt, json_list)
         for txt, json_list in sentences_labels_list:
             decide_where_to_put(txt, json_list, train_documentation, dev_documentation, test_documentation)

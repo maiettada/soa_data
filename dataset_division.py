@@ -81,6 +81,7 @@ def period_sect(labels_list, txt, labels_txt_list, divide=True):
         enable_print()
     else:
         x = -1
+        labels_txt_list.append([txt, labels_list])
     return x, labels_list, txt
 
 
