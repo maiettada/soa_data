@@ -27,8 +27,7 @@ def write_to_csv(filepath, list_items, label_subset_classes, df):
     return
 
 
-col_1 = [2, 4, 6, 8, 10]
-with open('evaluations-three-line.json1', 'r') as fp:
+with open('json-results/result1-regex-soa-categories.json', 'r') as fp:
     line = fp.readline()
     json_elements = json.loads(line) #load-string line
     ents_per_type = json_elements['ents_per_type']
@@ -37,6 +36,14 @@ with open('evaluations-three-line.json1', 'r') as fp:
     values_p = [x['p'] for x in ents_per_type.values()]
     values_r = [x['r'] for x in ents_per_type.values()]
     values_f = [x['f'] for x in ents_per_type.values()]
+with open('json-results/result1-regex-soa-classification.json', 'r') as fp:
+    line = fp.readline()
+    json_elements = json.loads(line) #load-string line
+    ents_per_type = json_elements['ents_per_type']
+    keys = keys + [x for x in ents_per_type.keys()]
+    #values = [x for x in ents_per_type.values()]
+    values_p = values_p + [x['p'] for x in ents_per_type.values()]
+    values_r = values_r + [x['r'] for x in ents_per_type.values()]
+    values_f = values_f + [x['f'] for x in ents_per_type.values()]
     df = fill_columns(keys, values_p, values_r, values_f )
     write_to_csv('soa_os_og.csv', list(json_elements.keys()), label_subset_os_og_categories, df)
-
