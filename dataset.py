@@ -192,8 +192,10 @@ def decide_where_to_put(txt, labels_list, train_documentation, dev_documentation
                 unsafe_entities_local_debug.pop()
                 doc.ents = unsafe_entities_local
                 print("exception- forgetting problematic label")
-    train_decided, test_decided = randomly_decide()
-    #train_decided, test_decided = automata_decide_listwise(labels_list)
+    if random:
+        train_decided, test_decided = randomly_decide()
+    else:
+        train_decided, test_decided = automata_decide_listwise(labels_list)
     print("ok - stored into safe")
     add_to_decided_bin(doc, train, dev, test, train_decided, test_decided, train_documentation, dev_documentation,
                        test_documentation, unsafe_entities_local_debug, labels_present)
@@ -223,6 +225,15 @@ def process_json1(obj_list, train, dev, test, train_documentation, test_document
     return
 
 
+"""
+    train, dev, test: docbins where this script is going to put the docs.
+    train_documentation, test_documentation, dev_documentation: lists where I put the labels, so I can check their
+     distribution at debugging phase 
+    random/not random(DistributionAutomaton): alternatives for distributing labels
+    
+    Final output: *.spacy files to be used in the spacy training
+"""
+random = True
 nlp = spacy.blank("it")
 train = DocBin()
 dev = DocBin()
@@ -233,15 +244,17 @@ dev_documentation = []
 soa_values_list = soa_categorie + soa_classifiche
 # creating objects of the class distributionAutomaton
 obj_list = []
-for label in soa_values_list:
-    new_obj = DistributionAutomaton(label)
-    obj_list.append(new_obj)
-# tested with gold-debug.json1 = {"id": 71379, "text": "nel paese di OS7 e OS8.", "labels": [[13, 16, "OS-7"], [19, 22, "OS-8"]]}
+if not random:
+    for label in soa_values_list:
+        new_obj = DistributionAutomaton(label)
+        obj_list.append(new_obj)
+# first test with gold.json1 = {"id": 71379, "text": "nel paese di OS7 e OS8.", "labels": [[13, 16, "OS-7"], [19, 22, "OS-8"]]}
 process_json1(obj_list, train, dev, test, train_documentation, test_documentation, dev_documentation)
-print("total #values:", len(soa_values_list), "#labels activated: ",len([x.is_it_used() for x in obj_list if x.is_it_used()==True]))
-print("#completed distr in the automata documents: ",len([x.how_many_distributions() for x in obj_list
-                                                          if x.how_many_distributions() >= 1]))
-print([(x.get_label(), x.how_many_distributions()) for x in obj_list])
+if not random:
+    print("total #values:", len(soa_values_list), "#labels activated: ",len([x.is_it_used() for x in obj_list if x.is_it_used()==True]))
+    print("#completed distr in the automata documents: ",len([x.how_many_distributions() for x in obj_list
+                                                              if x.how_many_distributions() >= 1]))
+    print([(x.get_label(), x.how_many_distributions()) for x in obj_list])
 train.to_disk("./train.spacy")
 dev.to_disk("./dev.spacy")
 test.to_disk("./test.spacy")
