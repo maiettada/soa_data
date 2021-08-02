@@ -33,24 +33,28 @@ def load_json_line_gold(gold_obj_json):
     """
     converting json string to json-inner-data-representation
     """
+
     gold_obj = json.loads(gold_obj_json)
     return gold_obj
 
 
 def format_json_line_data_gold(gold_obj):
     """handling just json-data-structures"""
+
     loaded_gold_data = [[item.get('text'), item.get('labels'), item.get('meta').get('ord_id')] for item in gold_obj]
     return loaded_gold_data
 
 
 def load_json_line_labelled(labelled_obj_json):
     """converting json string to json-inner-data-representation"""
+
     labelled_obj = json.loads(labelled_obj_json)
     return labelled_obj
 
 
 def format_json_line_data_labelled(labelled_obj):
     """handling just json-data-structures"""
+
     loaded_labelled_data = [[item.get('labels'), item.get('meta').get('ord_id')] for item in labelled_obj]
     return loaded_labelled_data
 
@@ -63,6 +67,20 @@ def init_nlp():
 
 
 def selection_list(label_list_i, gold_annots, label_subcategory, approach=3):
+    """
+    Approaches developed to conduct the evaluation.
+    Naive: just consider every label -> wrong labels require a try catch
+    Strict: just consider labels that coincide with golden ones (exception-SAFE, Spacy will not raise errors)
+    Loose approach: consider even labels that just overlap with the golden ones, eclude the others( still requires
+    a try/catch)
+
+    :param label_list_i:
+    :param gold_annots:
+    :param label_subcategory:
+    :param approach:
+    :return: list of labels to be considered
+    """
+
     if approach == 1:
         label_list_i_naive_approach = [[start_offset, end_offset, word]
                                        for [start_offset, end_offset, word]
@@ -89,6 +107,17 @@ def selection_list(label_list_i, gold_annots, label_subcategory, approach=3):
 
 
 def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory):
+    """
+    Evaluates the goodness of the labelled data
+    Evaluation is limited to the labels belonging to label_subcategory
+
+    :param: ner_model that is used to create docs
+    :param: gold_annotations, i.e. our ground truth
+    :param: labelled_data_lines, i.e. the data to be evaluated
+    :return: label_subcategory list, the list of labels to be considered in the evaluation
+    (so allowing independent evaluations on different labels lists )
+    """
+
     scorer = Scorer(ner_model)
     list = []
     for [gold_textunit, gold_annots, gold_ord_id] in gold_annotations:
@@ -104,11 +133,16 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory
         label_list_i = [[s_o, e_o, label] for [s_o, e_o, label] in label_list_i if label in label_subcategory]
         gold_annots = [[s_o, e_o, label] for [s_o, e_o, label] in gold_annots if label in label_subcategory]
         labelled_ner_textunit = ner_model.make_doc(gold_textunit)
-        label_list_i_selection = selection_list(label_list_i, gold_annots, label_subcategory)
+        label_list_i_selection = selection_list(label_list_i, gold_annots, label_subcategory,3)
         spans_i = [labelled_ner_textunit.char_span(start_offset, end_offset, word)
                    for [start_offset, end_offset, word] in label_list_i_selection]
         labelled_ner_textunit.ents = []
         added_spans = []
+        for span_i_j in spans_i:
+            added_spans.append(span_i_j)
+            labelled_ner_textunit.ents = added_spans
+        """
+        
         for span_i_j in spans_i:
             try:
                 added_spans.append(span_i_j)
@@ -116,6 +150,7 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory
             except TypeError:
                 added_spans.remove(span_i_j)
             pass
+        """
         item = Example.from_dict(labelled_ner_textunit, {"entities": [[start_offset, end_offset, word]
                                                                       for [start_offset, end_offset, word]
                                                                       in gold_annots]})
@@ -125,7 +160,12 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory
 
 
 def load_json_line_list(json1_filename):
-    """converting jsonl file (string made of lines of json) into list of json objects"""
+    """
+    converts jsonl file into list of json objects
+
+    :param: jsonl filepath
+    :return: list of json objects
+    """
 
     labelled_obj_list = []
     with open(json1_filename, "r") as a_file:
@@ -138,12 +178,12 @@ def load_json_line_list(json1_filename):
 
 def load_from_file():
     """
-    # return load_pickle_data()
-    # json line: it's a full JSON  of a jsonl file.
-    # In this context, a json line is related to an entire document
-    # return [load_json_line_gold(gold_obj_json_string), load_json_line_labelled(labelled_obj_json_string)]
-    #for json-list encoded in string
+    Returns the contents of the gold file and the labelled file.
+
+    :return: [json_line_list_gold, json_line_list_labelled], that are json lists respectively listing lines of the
+    "gold_json1" file and the "labelled_json1" file
     """
+
     json_line_list_gold = load_json_line_list(gold_json1_filename)
     json_line_list_labelled = load_json_line_list(labelled_json1_filename)
     return [json_line_list_gold, json_line_list_labelled]
@@ -151,14 +191,14 @@ def load_from_file():
 
 def format_data(file_data):
     """
-    INTERFACE
-     - gold_data = [ ['I like Europe and ice-creams.', [(7, 13, 'GPE'),(18,28,'food')]],
-                    ...]
-     - labelled_data = [ [(7, 13, 'GPE')],
-                    ...]
-    returns [gold_data, labelled_data]
+    Formats gold-labels and labels as follows:
+     - gold  = [ ['I like Europe and ice-creams.', [(7, 13, 'GPE'),(18,28,'food')]],   ...]
+     - labelled  = [ [(7, 13, 'GPE')],  ...]
+
+    :param: file_data, that is a list with file_data_gold labels and file_data_labelled labels
+    :return: [gold, labelled]
     """
-    # return file_data
+
     file_data_gold = file_data[0]
     file_data_labelled = file_data[1]
     gold = format_json_line_data_gold(file_data_gold)
@@ -166,7 +206,15 @@ def format_data(file_data):
     return [gold, labelled]
 
 
-handle_outputs()
+"""
+Main part: aim of the script is to evaluate a labelling system by comparing its results to the given ground truth
+
+labelled_json1_filename: labelled file to be evaluated; 
+gold_json1_filename: the ground truth;
+output_filename: file where the results of the evaluation are going to be written.
+
+"""
+#handle_outputs()
 ner_model = init_nlp()
 file_data = load_from_file()
 [loaded_gold_data, loaded_labelled_data] = format_data(file_data)
@@ -180,6 +228,10 @@ soa_categorie = ['OG-1', 'OG-2', 'OG-3', 'OG-4', 'OG-5', 'OG-6', 'OG-7', 'OG-8',
                  'OS-28', 'OS-29', 'OS-30', 'OS-31', 'OS-32', 'OS-33', 'OS-34', 'OS-35']
 evaluation_subcategory_lists = [soa_categorie, soa_classifiche]
 results = [None, None]
+"""
+core part of the script: the evaluation, that is called twice:
+ once for soa-categories, once for soa-classifications; result is sent in output to file
+"""
 for label_subcategory in evaluation_subcategory_lists:
     results[evaluation_subcategory_lists.index(label_subcategory)] = evaluate(ner_model, loaded_gold_data,
                                                                               loaded_labelled_data, label_subcategory)
