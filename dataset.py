@@ -1,13 +1,13 @@
 import spacy
 import json
 from spacy.tokens import DocBin
-from dataset_division import period_sect, sort_list
+from dataset_division import period_level_section, sort_list
 from distribution_automaton import DistributionAutomaton
 from soa_data import soa_classifiche, soa_categorie
 import random
 
 
-def read_json1_and_sect_by_period(fp, sentences_labels_list, n_lines=-1):
+def read_json1_and_section_by_period(fp, sentences_labels_list, n_lines=-1):
     """
     preprocessing: this procedure takes the json1 file, reads each line;
     for each line, moreover, sectioning in sentences is executed to permit later analysis at sentence level.
@@ -33,7 +33,7 @@ def read_json1_and_sect_by_period(fp, sentences_labels_list, n_lines=-1):
             pass   #n_lines=-1, NO MAXIMUM
         while found != -1:
             # crea un nuovo documento: ogni documento è derivato da una frase
-            found, json_list_base, txt_base = period_sect(json_list_base, txt_base, sentences_labels_list, divide)
+            found, json_list_base, txt_base = period_level_section(json_list_base, txt_base, sentences_labels_list, divide)
     return
 
 
@@ -218,7 +218,7 @@ def process_json1(obj_list, train, dev, test, train_documentation, test_document
     """
     with open('gold.json1', 'r') as fp:
         sentences_labels_list = []
-        read_json1_and_sect_by_period(fp, sentences_labels_list, 70)  # -1: everything must be cut into sentences
+        read_json1_and_section_by_period(fp, sentences_labels_list, -1)  # -1: everything must be cut into sentences
         # now sentences_labels_list has the pairs (txt, json_list)
         for txt, json_list in sentences_labels_list:
             decide_where_to_put(txt, json_list, train_documentation, dev_documentation, test_documentation)

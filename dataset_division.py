@@ -58,7 +58,7 @@ def enable_print():
     sys.stdout = sys.__stdout__
 
 
-def period_sect(labels_list, txt, labels_txt_list, divide=True):
+def period_level_section(labels_list, txt, labels_txt_list, divide=True):
     """
     This function divides a big [txt, labels_list] data structure in
     a proper list [[sentence1,labels_list1],...,[sentence_n,labels_list_n]]
@@ -94,7 +94,7 @@ def main():
     sort_list(json_list)
     found = 0
     while found!=-1:
-        found, json_list, txt = period_sect(json_list, txt, a)
+        found, json_list, txt = period_level_section(json_list, txt, a)
     print("-----")
     print("-----")
     print("-----")
@@ -107,7 +107,7 @@ def main():
     sort_list(json_list)
     found = 0
     while found!=-1:
-        found, json_list, txt = period_sect(json_list, txt, a)
+        found, json_list, txt = period_level_section(json_list, txt, a)
     print("-----")
     print(a)
     return

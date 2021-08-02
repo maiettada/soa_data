@@ -12,4 +12,6 @@ soa_categorie_valide: List[str] = ['OG-1', 'OG-2', 'OG-3', 'OG-4', 'OG-5', 'OG-6
                  'OS-20B', 'OS-21', 'OS-22', 'OS-23', 'OS-24', 'OS-25', 'OS-26', 'OS-27',
                  'OS-28', 'OS-29', 'OS-30', 'OS-31', 'OS-32', 'OS-33', 'OS-34', 'OS-35']
 
+
+
 soa_categorie: List[str] = soa_categorie_valide + ['']
