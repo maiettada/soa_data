@@ -3,6 +3,7 @@ import spacy
 from spacy.scorer import Scorer
 from spacy.training import Example
 
+
 gold_json1_filename = 'gold.json1'
 labelled_json1_filename = 'v3.json1'
 output_filename = 'output_file.txt'
@@ -71,8 +72,7 @@ def selection_list(label_list_i, gold_annots, label_subcategory, approach=3):
     Approaches developed to conduct the evaluation.
     Naive: just consider every label -> wrong labels require a try catch
     Strict: just consider labels that coincide with golden ones (exception-SAFE, Spacy will not raise errors)
-    Loose approach: consider even labels that just overlap with the golden ones, eclude the others( still requires
-    a try/catch)
+    Loose approach: tolerate imprecise intervals; tolerate intervals with double-labels
 
     :param label_list_i:
     :param gold_annots:
@@ -110,6 +110,7 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory
     """
     Evaluates the goodness of the labelled data
     Evaluation is limited to the labels belonging to label_subcategory
+    False positives are not taken into account by the scorer
 
     :param: ner_model that is used to create docs
     :param: gold_annotations, i.e. our ground truth
@@ -133,16 +134,11 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory
         label_list_i = [[s_o, e_o, label] for [s_o, e_o, label] in label_list_i if label in label_subcategory]
         gold_annots = [[s_o, e_o, label] for [s_o, e_o, label] in gold_annots if label in label_subcategory]
         labelled_ner_textunit = ner_model.make_doc(gold_textunit)
-        label_list_i_selection = selection_list(label_list_i, gold_annots, label_subcategory,3)
+        label_list_i_selection = selection_list(label_list_i, gold_annots, label_subcategory)
         spans_i = [labelled_ner_textunit.char_span(start_offset, end_offset, word)
                    for [start_offset, end_offset, word] in label_list_i_selection]
         labelled_ner_textunit.ents = []
         added_spans = []
-        for span_i_j in spans_i:
-            added_spans.append(span_i_j)
-            labelled_ner_textunit.ents = added_spans
-        """
-        
         for span_i_j in spans_i:
             try:
                 added_spans.append(span_i_j)
@@ -150,7 +146,6 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory
             except TypeError:
                 added_spans.remove(span_i_j)
             pass
-        """
         item = Example.from_dict(labelled_ner_textunit, {"entities": [[start_offset, end_offset, word]
                                                                       for [start_offset, end_offset, word]
                                                                       in gold_annots]})
@@ -213,8 +208,12 @@ labelled_json1_filename: labelled file to be evaluated;
 gold_json1_filename: the ground truth;
 output_filename: file where the results of the evaluation are going to be written.
 
+to try with more easy json1 documents, do
+git checkout 283828b3b47dec37c3fa66c5284d02e61aa5289e -- gold.json1 labelled.json1
+and use the following line
+labelled_json1_filename = 'labelled.json1'
 """
-#handle_outputs()
+handle_outputs()
 ner_model = init_nlp()
 file_data = load_from_file()
 [loaded_gold_data, loaded_labelled_data] = format_data(file_data)
