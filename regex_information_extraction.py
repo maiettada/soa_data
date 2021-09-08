@@ -568,13 +568,15 @@ interval_doc_dump()
 Helper procedures to print documents to console
 """
 
-def printdoc(her):
+def print_doc(her):
  with suppress_stdout():
   testi = read_df('/content/drive/My Drive/Dataset/soa.csv', 'testo')
  print(testi[her])
 
-#printdoc(0)
 
+#no pretty printing:  \n\r can show up in the string 
 with suppress_stdout():
- testi = read_df('/content/drive/My Drive/Dataset/soa.csv', 'testo')
-testi[99]
+  testi = read_df('/content/drive/My Drive/Dataset/soa.csv', 'testo')
+testi[0]
+
+#print_doc(0) # prints the doc in a readable form
