@@ -4,6 +4,13 @@ import pandas as pd
 
 pd.__version__
 
+"""
+Helper script that I use here to convert Scorer outputs in the right format.
+It converts json data (precision, recall, accuracy of every label) 
+in csv format.
+"""
+
+
 labels = soa_categorie_valide + soa_classifiche
 
 
@@ -72,6 +79,24 @@ def json_results_to_csv(json_filepath, csv_filepath):
     return
 
 
+def json_regex_results_to_csv(categories_filepath, classification_filepath, csv_filepath):
+    with open(categories_filepath, 'r') as fp:
+        line = fp.readline()
+        json_elements = json.loads(line)  # load-string line
+        ents_per_type = json_elements['ents_per_type']
+        ordered = make_ordered_list(ents_per_type, soa_categorie_valide)
+    with open(classification_filepath, 'r') as fp:
+        line = fp.readline()
+        json_elements = json.loads(line)  # load-string line
+        ents_per_type = json_elements['ents_per_type']
+        ordered = ordered + make_ordered_list(ents_per_type, soa_classifiche)
+        keys = [x[0] for x in ordered]
+        values_p = [x[1] for x in ordered]
+        values_r = [x[2] for x in ordered]
+        values_f = [x[3] for x in ordered]
+        df = fill_columns(keys, values_p, values_r, values_f)
+        write_to_csv(csv_filepath, df)
+
 """
 Aim of this part:
 1.extracting the key/values from ents_per_type json_array
@@ -81,22 +106,13 @@ Aim of this part:
 note: json_results_to_csv does the same, but here I don't use that because I have two different jsons-files with data
 to be merged 
 """
-with open('json-results/result1-regex-soa-categories.json', 'r') as fp:
-    line = fp.readline()
-    json_elements = json.loads(line)  # load-string line
-    ents_per_type = json_elements['ents_per_type']
-    ordered = make_ordered_list(ents_per_type, soa_categorie_valide)
-with open('json-results/result1-regex-soa-classification.json', 'r') as fp:
-    line = fp.readline()
-    json_elements = json.loads(line)  # load-string line
-    ents_per_type = json_elements['ents_per_type']
-    ordered = ordered + make_ordered_list(ents_per_type, soa_classifiche)
-    keys = [x[0] for x in ordered]
-    values_p = [x[1] for x in ordered]
-    values_r = [x[2] for x in ordered]
-    values_f = [x[3] for x in ordered]
-    df = fill_columns(keys, values_p, values_r, values_f)
-    write_to_csv('csv_tables/soa_os_og_regex.csv', df)
+#REGEX SCORES-scorer was divided in categories-scorer and classification-scorer
+# (two different jsons in input)
+json_regex_results_to_csv('json-results/result1-regex-soa-categories.json',
+                          'json-results/result1-regex-soa-classification.json',
+                          'csv_tables/soa_os_og_regex.csv'
+                          )
+#spacy ner SCORES- "spacy evaluate" command
 json_results_to_csv('json-results/result2-full-automa.json', 'csv_tables/soa_os_og_full_automa.csv')
 json_results_to_csv('json-results/result3-full-rnd.json', 'csv_tables/soa_os_og_full_rnd.csv')
 json_results_to_csv('json-results/result4-partial-sentences.json', 'csv_tables/soa_os_og_partial.csv')
