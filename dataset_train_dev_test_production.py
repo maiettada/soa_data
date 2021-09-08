@@ -6,6 +6,26 @@ from distribution_automaton import DistributionAutomaton
 from soa_data import soa_classifiche, soa_categorie
 import random
 
+"""
+    This script creates the doc_bins needed by Spacy (train, dev, test) for the setup of a neural network(spacy "ner" 
+    task).
+    A ground truth must be given in input ( in variable gold_json1_file).
+    The ground truth is read, with all the text and golden labels.
+    Text and labels are divided in smaller docs, made by single sentences and related labels.
+    At the end of the execution every (sentence, label) couple is sent to a doc_bin,
+    either randomly ( random_strategy boolean, set by default)
+    either with DistributionAutomaton that keeps track of the already-processed data.
+"""
+
+
+#input
+gold_json1_file = 'gold.json1'
+
+#output filepaths
+train_docbin = "./train.spacy"
+dev_docbin = "./dev.spacy"
+test_docbin = "./test.spacy"
+
 
 def read_json1_and_section_by_period(fp, sentences_labels_list, n_lines=-1):
     """
@@ -192,7 +212,7 @@ def decide_where_to_put(txt, labels_list, train_documentation, dev_documentation
                 unsafe_entities_local_debug.pop()
                 doc.ents = unsafe_entities_local
                 print("exception- forgetting problematic label")
-    if random:
+    if random_strategy:
         train_decided, test_decided = randomly_decide()
     else:
         train_decided, test_decided = automata_decide_listwise(labels_list)
@@ -202,11 +222,12 @@ def decide_where_to_put(txt, labels_list, train_documentation, dev_documentation
     return
 
 
-def process_json1(obj_list, train, dev, test, train_documentation, test_documentation, dev_documentation):
+def process_json1(ground_truth, obj_list, train, dev, test, train_documentation, test_documentation, dev_documentation):
     """
     The procedure reads a json1 file, then calls the read_json1_and_sect_by_period.
     Finally, it distributes each sentence and related labels to the proper bin.
 
+    :param ground_truth: filepath(string) for json1 file with golden annotations
     :param obj_list: lists of labels-automataxxx
     :param train: train DocBin
     :param dev: dev DocBin
@@ -216,7 +237,7 @@ def process_json1(obj_list, train, dev, test, train_documentation, test_document
     :param dev_documentation: (for debugging purposes) will contain labels-lists that are added into dev docbin;
     :return:
     """
-    with open('gold.json1', 'r') as fp:
+    with open(ground_truth, 'r') as fp:
         sentences_labels_list = []
         read_json1_and_section_by_period(fp, sentences_labels_list, -1)  # -1: everything must be cut into sentences
         # now sentences_labels_list has the pairs (txt, json_list)
@@ -233,7 +254,7 @@ def process_json1(obj_list, train, dev, test, train_documentation, test_document
     
     Final output: *.spacy files to be used in the spacy training
 """
-random = True
+random_strategy = True
 nlp = spacy.blank("it")
 train = DocBin()
 dev = DocBin()
@@ -244,17 +265,17 @@ dev_documentation = []
 soa_values_list = soa_categorie + soa_classifiche
 # creating objects of the class distributionAutomaton
 obj_list = []
-if not random:
+if not random_strategy:
     for label in soa_values_list:
         new_obj = DistributionAutomaton(label)
         obj_list.append(new_obj)
 # first test with gold.json1 = {"id": 71379, "text": "nel paese di OS7 e OS8.", "labels": [[13, 16, "OS-7"], [19, 22, "OS-8"]]}
-process_json1(obj_list, train, dev, test, train_documentation, test_documentation, dev_documentation)
-if not random:
+process_json1(gold_json1_file, obj_list, train, dev, test, train_documentation, test_documentation, dev_documentation)
+if not random_strategy:
     print("total #values:", len(soa_values_list), "#labels activated: ",len([x.is_it_used() for x in obj_list if x.is_it_used()==True]))
     print("#completed distr in the automata documents: ",len([x.how_many_distributions() for x in obj_list
                                                               if x.how_many_distributions() >= 1]))
     print([(x.get_label(), x.how_many_distributions()) for x in obj_list])
-train.to_disk("./train.spacy")
-dev.to_disk("./dev.spacy")
-test.to_disk("./test.spacy")
+train.to_disk(train_docbin)
+dev.to_disk(dev_docbin)
+test.to_disk(test_docbin)
