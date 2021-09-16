@@ -10,7 +10,6 @@ It converts json data (precision, recall, accuracy of every label)
 in csv format.
 """
 
-
 labels = soa_categorie_valide + soa_classifiche
 
 
@@ -97,22 +96,28 @@ def json_regex_results_to_csv(categories_filepath, classification_filepath, csv_
         df = fill_columns(keys, values_p, values_r, values_f)
         write_to_csv(csv_filepath, df)
 
-"""
-Aim of this part:
-1.extracting the key/values from ents_per_type json_array
-2.putting them in the right order (first categories, then classifications)
-3.writing them to a csv file
 
-note: json_results_to_csv does the same, but here I don't use that because I have two different jsons-files with data
-to be merged 
-"""
-#REGEX SCORES-scorer was divided in categories-scorer and classification-scorer
-# (two different jsons in input)
-json_regex_results_to_csv('json-results/result1-regex-soa-categories.json',
-                          'json-results/result1-regex-soa-classification.json',
-                          'csv_tables/soa_os_og_regex.csv'
-                          )
-#spacy ner SCORES- "spacy evaluate" command
-json_results_to_csv('json-results/result2-full-automa.json', 'csv_tables/soa_os_og_full_automa.csv')
-json_results_to_csv('json-results/result3-full-rnd.json', 'csv_tables/soa_os_og_full_rnd.csv')
-json_results_to_csv('json-results/result4-partial-sentences.json', 'csv_tables/soa_os_og_partial.csv')
+def main():
+    """
+    Aim of this part:
+    1.extracting the key/values from ents_per_type json_array
+    2.putting them in the right order (first categories, then classifications)
+    3.writing them to a csv file
+
+    note: json_results_to_csv does the same, but here I don't use that because I have two different jsons-files with
+    data to be merged
+    """
+    # REGEX SCORES-scorer was divided in categories-scorer and classification-scorer
+    # (two different jsons in input)
+    json_regex_results_to_csv('json-results/result1-regex-soa-categories.json',
+                              'json-results/result1-regex-soa-classification.json',
+                              'csv_tables/soa_os_og_regex.csv'
+                              )
+    # spacy ner SCORES- "spacy evaluate" command
+    json_results_to_csv('json-results/result2-full-automa.json', 'csv_tables/soa_os_og_full_automa.csv')
+    json_results_to_csv('json-results/result3-full-rnd.json', 'csv_tables/soa_os_og_full_rnd.csv')
+    json_results_to_csv('json-results/result4-partial-sentences.json', 'csv_tables/soa_os_og_partial.csv')
+
+
+if __name__ == "__main__":
+    main()

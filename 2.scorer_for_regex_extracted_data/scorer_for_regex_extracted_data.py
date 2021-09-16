@@ -201,41 +201,47 @@ def format_data(file_data):
     return [gold, labelled]
 
 
-"""
-Main part: aim of the script is to evaluate a labelling system by comparing its results to the given ground truth
+def main():
+    """
+    Main part: aim of the script is to evaluate a labelling system by comparing its results to the given ground truth
 
-labelled_json1_filename: labelled file to be evaluated; 
-gold_json1_filename: the ground truth;
-output_filename: file where the results of the evaluation are going to be written.
+    labelled_json1_filename: labelled file to be evaluated; here 3 regex with increasing complexity were used for SOA data;
+                             regex-extracted SOA data are in v1.json1, v2.json1, v3.json1;
+    gold_json1_filename: the ground truth;
+    output_filename: file where the results of the evaluation are going to be written.
 
-to try with more easy json1 documents, do
-git checkout 283828b3b47dec37c3fa66c5284d02e61aa5289e -- gold.json1 labelled.json1
-and use the following line
-labelled_json1_filename = 'labelled.json1'
-"""
-handle_outputs()
-ner_model = init_nlp()
-file_data = load_from_file()
-[loaded_gold_data, loaded_labelled_data] = format_data(file_data)
-# print(ner_model.pipe_names)
-soa_classifiche = ['I', 'II', 'III-bis', 'IV', 'IV-bis', 'V', 'VI', 'VII', 'VIII']
-soa_categorie = ['OG-1', 'OG-2', 'OG-3', 'OG-4', 'OG-5', 'OG-6', 'OG-7', 'OG-8', 'OG-9', 'OG-10',
-                 'OG-11', 'OG-12', 'OG-13', 'OS-1', 'OS-2A', 'OS-2B', 'OS-3', 'OS-4', 'OS-5', 'OS-6',
-                 'OS-7', 'OS-8', 'OS-9', 'OS-10', 'OS-11', 'OS-12A', 'OS-12B', 'OS-13',
-                 'OS-14', 'OS-15', 'OS-16', 'OS-17', 'OS-18A', 'OS-18B', 'OS-19', 'OS-20A',
-                 'OS-20B', 'OS-21', 'OS-22', 'OS-23', 'OS-24', 'OS-25', 'OS-26', 'OS-27',
-                 'OS-28', 'OS-29', 'OS-30', 'OS-31', 'OS-32', 'OS-33', 'OS-34', 'OS-35']
-evaluation_subcategory_lists = [soa_categorie, soa_classifiche]
-results = [None, None]
-"""
-core part of the script: the evaluation, that is called twice:
- once for soa-categories, once for soa-classifications; result is sent in output to file
-"""
-for label_subcategory in evaluation_subcategory_lists:
-    results[evaluation_subcategory_lists.index(label_subcategory)] = evaluate(ner_model, loaded_gold_data,
-                                                                              loaded_labelled_data, label_subcategory)
-for label_subcategory in evaluation_subcategory_lists:
-    to_output_file(str(label_subcategory) +
-                   " results:\n " +
-                   json.dumps(results[evaluation_subcategory_lists.index(label_subcategory)]) +
-                   "\n\n")
+    to try with more easy json1 documents, do
+    git checkout 283828b3b47dec37c3fa66c5284d02e61aa5289e -- gold.json1 labelled.json1
+    and use the following line
+    labelled_json1_filename = 'labelled.json1'
+    """
+    handle_outputs()
+    ner_model = init_nlp()
+    file_data = load_from_file()
+    [loaded_gold_data, loaded_labelled_data] = format_data(file_data)
+    # print(ner_model.pipe_names)
+    soa_classifiche = ['I', 'II', 'III-bis', 'IV', 'IV-bis', 'V', 'VI', 'VII', 'VIII']
+    soa_categorie = ['OG-1', 'OG-2', 'OG-3', 'OG-4', 'OG-5', 'OG-6', 'OG-7', 'OG-8', 'OG-9', 'OG-10',
+                     'OG-11', 'OG-12', 'OG-13', 'OS-1', 'OS-2A', 'OS-2B', 'OS-3', 'OS-4', 'OS-5', 'OS-6',
+                     'OS-7', 'OS-8', 'OS-9', 'OS-10', 'OS-11', 'OS-12A', 'OS-12B', 'OS-13',
+                     'OS-14', 'OS-15', 'OS-16', 'OS-17', 'OS-18A', 'OS-18B', 'OS-19', 'OS-20A',
+                     'OS-20B', 'OS-21', 'OS-22', 'OS-23', 'OS-24', 'OS-25', 'OS-26', 'OS-27',
+                     'OS-28', 'OS-29', 'OS-30', 'OS-31', 'OS-32', 'OS-33', 'OS-34', 'OS-35']
+    evaluation_subcategory_lists = [soa_categorie, soa_classifiche]
+    results = [None, None]
+    """
+    core part of the script: the evaluation, that is called twice:
+     once for soa-categories, once for soa-classifications; result is sent in output to file
+    """
+    for label_subcategory in evaluation_subcategory_lists:
+        results[evaluation_subcategory_lists.index(label_subcategory)] = evaluate(ner_model, loaded_gold_data,
+                                                                                  loaded_labelled_data, label_subcategory)
+    for label_subcategory in evaluation_subcategory_lists:
+        to_output_file(str(label_subcategory) +
+                       " results:\n " +
+                       json.dumps(results[evaluation_subcategory_lists.index(label_subcategory)]) +
+                       "\n\n")
+
+
+if __name__ == "__main__":
+    main()

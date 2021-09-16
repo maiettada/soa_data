@@ -62,6 +62,3 @@ def debug_distribution_automaton():
     print(autom.read_decision(7)) # decision: insert into train set
     print("How many distributions were completed?", autom.how_many_distributions())
     return
-
-
-debug_distribution_automaton()

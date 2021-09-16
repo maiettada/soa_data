@@ -85,7 +85,7 @@ def period_level_section(labels_list, txt, labels_txt_list, divide=True):
     return x, labels_list, txt
 
 
-def main():
+def test_division_functionalities():
     #dividing document "i" in periods
     # trivial case: every sentence is labelled
     a = []
@@ -112,6 +112,3 @@ def main():
     print(a)
     return
 
-
-if __name__ == "__main__":
-    main()
