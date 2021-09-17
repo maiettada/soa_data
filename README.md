@@ -1,4 +1,8 @@
-# soa_data
+# Extraction of public administration data from official documents
+
+The following modules were used to perform a Named Entity Recognition of data from documents(mostly tenders) of the Public Administration.
+Those data describe the certifications that a company is required to have to apply for a tender; the certification are called SOA certifications.
+The modules of this repository were built and used to extract SOA certifications data from documents.
 
 **Modules**: 
 1. Regex information extraction: python script that extracts soa data with the usage of regular expressions;
