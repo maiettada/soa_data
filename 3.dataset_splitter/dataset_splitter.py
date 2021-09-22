@@ -245,6 +245,15 @@ def process_json1(ground_truth, obj_list, train, dev, test, train_documentation,
             decide_where_to_put(txt, json_list, train_documentation, dev_documentation, test_documentation)
     return
 
+random_strategy = True
+nlp = spacy.blank("it")
+train = DocBin()
+dev = DocBin()
+test = DocBin()
+train_documentation = []
+test_documentation = []
+dev_documentation = []
+
 
 def main():
     """
@@ -255,14 +264,6 @@ def main():
 
         Final output: *.spacy files to be used in the spacy training
     """
-    random_strategy = True
-    nlp = spacy.blank("it")
-    train = DocBin()
-    dev = DocBin()
-    test = DocBin()
-    train_documentation = []
-    test_documentation = []
-    dev_documentation = []
     soa_values_list = soa_categorie + soa_classifiche
     # creating objects of the class distributionAutomaton
     obj_list = []
@@ -270,8 +271,7 @@ def main():
         for label in soa_values_list:
             new_obj = DistributionAutomaton(label)
             obj_list.append(new_obj)
-    # first test with gold.json1 = {"id": 71379, "text": "nel paese di OS7 e OS8.",
-    # "labels": [[13, 16, "OS-7"], [19, 22, "OS-8"]]}
+    # first test with gold.json1 = {"id": 71379, "text": "nel paese di OS7 e OS8.", "labels": [[13, 16, "OS-7"], [19, 22, "OS-8"]]}
     process_json1(gold_json1_file, obj_list, train, dev, test, train_documentation, test_documentation, dev_documentation)
     if not random_strategy:
         print("total #values:", len(soa_values_list), "#labels activated: ",len([x.is_it_used() for x in obj_list if x.is_it_used()==True]))
@@ -281,7 +281,6 @@ def main():
     train.to_disk(train_docbin)
     dev.to_disk(dev_docbin)
     test.to_disk(test_docbin)
-
 
 if __name__ == "__main__":
     main()
