@@ -97,16 +97,7 @@ def json_regex_results_to_csv(categories_filepath, classification_filepath, csv_
         write_to_csv(csv_filepath, df)
 
 
-def main():
-    """
-    Aim of this part:
-    1.extracting the key/values from ents_per_type json_array
-    2.putting them in the right order (first categories, then classifications)
-    3.writing them to a csv file
-
-    note: json_results_to_csv does the same, but here I don't use that because I have two different jsons-files with
-    data to be merged
-    """
+def main_old():
     # REGEX SCORES-scorer was divided in categories-scorer and classification-scorer
     # (two different jsons in input)
     json_regex_results_to_csv('json-results/result1-regex-soa-categories.json',
@@ -117,6 +108,20 @@ def main():
     json_results_to_csv('json-results/result2-full-automa.json', 'csv_tables/soa_os_og_full_automa.csv')
     json_results_to_csv('json-results/result3-full-rnd.json', 'csv_tables/soa_os_og_full_rnd.csv')
     json_results_to_csv('json-results/result4-partial-sentences.json', 'csv_tables/soa_os_og_partial.csv')
+
+
+def main():
+    """
+    Aim of this part:
+    1.extracting the key/values from ents_per_type json_array
+    2.putting them in the right order (first categories, then classifications)
+    3.writing them to a csv file
+
+    note: json_results_to_csv does the same, but here I don't use that because I have two different jsons-files with
+    data to be merged
+    """
+    json_results_to_csv('regex_results.json', 'regex_results.csv')
+    json_results_to_csv('ner_results.json', 'ner_results.csv')
 
 
 if __name__ == "__main__":

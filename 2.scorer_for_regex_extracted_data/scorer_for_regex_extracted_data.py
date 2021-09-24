@@ -7,10 +7,20 @@ from spacy.training import Example
 gold_json1_filename = 'gold.json1'
 labelled_json1_filename = 'v3.json1'
 output_filename = 'output_file.txt'
+output_filename_cat = 'output_cat.json'
+output_filename_class = 'output_class.json'
+output_filename_unified = 'output_cat_class.json'
 
 
-def to_output_file(strings):
-    with open(output_filename, "a") as a_file:
+def to_output_file(strings, filename):
+    with open(filename, 'w') as a_file:
+        for string in strings:
+            a_file.write(string)
+    return
+
+
+def to_output(strings):
+    with open(output_filename, 'a') as a_file:
         for string in strings:
             a_file.write(string)
     return
@@ -20,6 +30,11 @@ def handle_outputs():
     import warnings
     warnings.filterwarnings("ignore")
     return
+
+
+def unify_json_element(results_cat, results_class, list_name):
+    return_list = dict(list(results_cat['ents_per_type'].items()) + list(results_class['ents_per_type'].items()))
+    return {list_name: return_list}
 
 
 def overlaps(interv_1, interv_2):
@@ -237,10 +252,14 @@ def main():
         results[evaluation_subcategory_lists.index(label_subcategory)] = evaluate(ner_model, loaded_gold_data,
                                                                                   loaded_labelled_data, label_subcategory)
     for label_subcategory in evaluation_subcategory_lists:
-        to_output_file(str(label_subcategory) +
+        to_output(str(label_subcategory) +
                        " results:\n " +
                        json.dumps(results[evaluation_subcategory_lists.index(label_subcategory)]) +
                        "\n\n")
+    results_cat = evaluate(ner_model, loaded_gold_data, loaded_labelled_data, soa_categorie)
+    results_class = evaluate(ner_model, loaded_gold_data, loaded_labelled_data, soa_classifiche)
+    results_unified = unify_json_element(results_cat, results_class, 'ents_per_type')
+    to_output_file(json.dumps(results_unified), output_filename_unified)
 
 
 if __name__ == "__main__":

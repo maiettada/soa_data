@@ -11,4 +11,5 @@ The modules of this repository were built and used to extract  certifications da
 It's a necessary step for the setup of a NER task in spacy;
 4. run ner task: bash scripts to initialize, train, debug and evaluate the neural network with the usage of the Spacy library;
 5. json to csv: helper script to convert Spacy-scores from json format to csv format;
+
 documented_outputs: results of the modules with the real data.

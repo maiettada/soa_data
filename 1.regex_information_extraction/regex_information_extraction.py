@@ -16,6 +16,8 @@ from contextlib import redirect_stdout
 import re
 
 
+jsonl_file = "v3.json1"
+
 def read_df_limited(filepath, section):
     with suppress_stdout():
         dataframe = pd.read_csv(filepath, sep=',', nrows=limit)
@@ -85,21 +87,6 @@ def fill_columns(col_text, col_retr, col_relev, col_prec, col_recall):
                        'Classif. individuate': col_recall})
     return df
 
-
-# Here I will test the fill_columns routine
-# the resulting df will be passed to the write_df for writing to file
-col_text = ['OG1 blablabla', 'OG-99 bim bum bam']
-col_retr = ['OG-1', '']
-col_relev = ['OG-1', '']
-col_prec = ['', '']
-col_recall = ['', '']
-df = fill_columns(col_text, col_retr, col_relev, col_prec, col_recall)
-
-write_df('Dataset/windowings.csv', df)
-print(delimiter + Color.BOLD + 'Hello World !' + Color.END + delimiter)
-with suppress_stdout():
-    print(delimiter + Color.BOLD + 'Hello World !' + Color.END + delimiter)
-redirection(print)
 
 # most complex regex
 soa_cat_regex_iii = r'O(S|G|s|g)\n?[-\s]?\n?(\d\d?\w?).*'
@@ -567,6 +554,14 @@ def single_doc_dump():
     print(dumps_jsonl(text, retr, array_index))
 
 
+def print_to_file(json_line):
+    """
+    This function writes data df to a file
+    """
+    with open(jsonl_file, 'a') as f:
+        f.write(json_line)
+        f.write('\n')
+
 def interval_doc_dump():
     """
     Executing the regex soa-extraction on an interval of docs.
@@ -577,7 +572,7 @@ def interval_doc_dump():
         with suppress_stdout():
             df, text, windows, retr = extract_soa_data(indice)
         # print(dumps_jsonl(text, retr, indice))
-        print(dumps_labels_only(retr, indice))
+        print_to_file(dumps_labels_only(retr, indice))
         sleep(0.20)
 
 
