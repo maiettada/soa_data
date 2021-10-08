@@ -120,7 +120,6 @@ def main():
     note: json_results_to_csv does the same, but here I don't use that because I have two different jsons-files with
     data to be merged
     """
-    json_results_to_csv('regex_results.json', 'regex_results.csv')
     json_results_to_csv('ner_results.json', 'ner_results.csv')
 
 
