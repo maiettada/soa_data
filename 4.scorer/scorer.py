@@ -5,11 +5,10 @@ from spacy.training import Example
 
 
 gold_json1_filename = 'gold.json1'
-labelled_json1_filename = 'v3.json1'
-output_filename = 'output_file.txt'
-output_filename_cat = 'output_cat.json'
-output_filename_class = 'output_class.json'
-output_filename_unified = 'output_cat_class.json'
+labelled_json1_filename_regex = 'regex.json1'
+labelled_json1_filename_spacy = 'spacy.json1'
+output_scores_regex = 'scores_regex.json'
+output_scores_spacy = 'scores_spacy.json'
 
 
 def to_output_file(strings, filename):
@@ -17,14 +16,6 @@ def to_output_file(strings, filename):
         for string in strings:
             a_file.write(string)
     return
-
-
-def to_output(strings):
-    with open(output_filename, 'a') as a_file:
-        for string in strings:
-            a_file.write(string)
-    return
-
 
 def handle_outputs():
     import warnings
@@ -158,7 +149,7 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory
             try:
                 added_spans.append(span_i_j)
                 labelled_ner_textunit.ents = added_spans
-            except TypeError:
+            except:
                 added_spans.remove(span_i_j)
             pass
         item = Example.from_dict(labelled_ner_textunit, {"entities": [[start_offset, end_offset, word]
@@ -186,7 +177,7 @@ def load_json_line_list(json1_filename):
     return labelled_obj_list
 
 
-def load_from_file():
+def load_from_file(labelled_json1_filename):
     """
     Returns the contents of the gold file and the labelled file.
 
@@ -216,7 +207,7 @@ def format_data(file_data):
     return [gold, labelled]
 
 
-def main():
+def compute_score(labelled_json1_filename, output_filename):
     """
     Main part: aim of the script is to evaluate a labelling system by comparing its results to the given ground truth
 
@@ -232,7 +223,7 @@ def main():
     """
     handle_outputs()
     ner_model = init_nlp()
-    file_data = load_from_file()
+    file_data = load_from_file(labelled_json1_filename)
     [loaded_gold_data, loaded_labelled_data] = format_data(file_data)
     # print(ner_model.pipe_names)
     soa_classifiche = ['I', 'II', 'III-bis', 'IV', 'IV-bis', 'V', 'VI', 'VII', 'VIII']
@@ -251,16 +242,12 @@ def main():
     for label_subcategory in evaluation_subcategory_lists:
         results[evaluation_subcategory_lists.index(label_subcategory)] = evaluate(ner_model, loaded_gold_data,
                                                                                   loaded_labelled_data, label_subcategory)
-    for label_subcategory in evaluation_subcategory_lists:
-        to_output(str(label_subcategory) +
-                       " results:\n " +
-                       json.dumps(results[evaluation_subcategory_lists.index(label_subcategory)]) +
-                       "\n\n")
     results_cat = evaluate(ner_model, loaded_gold_data, loaded_labelled_data, soa_categorie)
     results_class = evaluate(ner_model, loaded_gold_data, loaded_labelled_data, soa_classifiche)
     results_unified = unify_json_element(results_cat, results_class, 'ents_per_type')
-    to_output_file(json.dumps(results_unified), output_filename_unified)
+    to_output_file(json.dumps(results_unified), output_filename)
 
 
 if __name__ == "__main__":
-    main()
+    compute_score(labelled_json1_filename_regex, output_scores_regex)
+    compute_score(labelled_json1_filename_spacy, output_scores_spacy)
