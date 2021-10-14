@@ -18,5 +18,5 @@ documented_outputs: results of the modules with the real data.
 
 
 
-[embed]https://github.com/maiettada/soa_data_extraction/blob/main/flow_chart.pdf[/embed]
+[embed]https://github.com/maiettada/soa_data_extraction/blob/main/flow_chart.pdf [/embed]
 
