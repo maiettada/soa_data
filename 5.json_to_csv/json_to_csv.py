@@ -15,6 +15,9 @@ It converts json data (precision, recall, accuracy of every label)
 in csv format.
 """
 
+regex='scores_regex.json'
+spacy='scores_spacy.json'
+
 labels = soa_categorie_valide + soa_classifiche
 
 
@@ -125,7 +128,8 @@ def main():
     note: json_results_to_csv does the same, but here I don't use that because I have two different jsons-files with
     data to be merged
     """
-    json_results_to_csv('ner_results.json', 'ner_results.csv')
+    json_results_to_csv(regex, 'regex.csv')
+    json_results_to_csv(spacy, 'spacy.csv')
 
 
 if __name__ == "__main__":
