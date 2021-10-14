@@ -15,3 +15,8 @@ It's a necessary step for the setup of a NER task in spacy;
 5. json to csv: helper script to convert Spacy-scores from json format to csv format;
 
 documented_outputs: results of the modules with the real data.
+
+
+
+[embed]https://github.com/maiettada/soa_data_extraction/blob/main/flow_chart.pdf[/embed]
+
