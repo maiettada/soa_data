@@ -1,7 +1,7 @@
 from typing import List
 
 
-soa_classifiche: List[str] = ['I', 'II', 'III-bis', 'IV', 'IV-bis', 'V', 'VI', 'VII', 'VIII']
+soa_classifiche: List[str] = ['I', 'II', 'III', 'III-bis', 'IV', 'IV-bis', 'V', 'VI', 'VII', 'VIII']
 
 
 

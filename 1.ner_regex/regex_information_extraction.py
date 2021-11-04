@@ -20,7 +20,7 @@ jsonl_file = "v3.json1"
 
 def read_df_limited(filepath, section):
     with suppress_stdout():
-        dataframe = pd.read_csv(filepath, sep=',', nrows=limit)
+        dataframe = pd.read_csv(filepath, sep=',', nrows=limit) #, encoding='utf-8'???
         return dataframe[section]
 
 
@@ -89,19 +89,19 @@ def fill_columns(col_text, col_retr, col_relev, col_prec, col_recall):
 
 
 # most complex regex
-soa_cat_regex_iii = r'O(S|G|s|g)\n?[-\s]?\n?(\d\d?\w?).*'
-ordinals_regex_iii = r'(IV\s?\-?bis|IV|III\s?\-?bis|III|II|IX|VIII|VII|VI|X|V|I)[^\w]'
+soa_cat_regex_iii = r'O(S|G|s|g)\n?[-\s]?\n?(\d\d?\w?)'
+ordinals_regex_iii = r'(IV\s?\-?bis|IV|III\s?\-?bis|III|II|IX|VIII|VII|VI|X|V|I)'
 
 # medium-complexity regex
-soa_cat_regex_ii = r'O(S|G|s|g)(\d\d?\w?).*'
+soa_cat_regex_ii = r'O(S|G|s|g)(\d\d?\w?)'
 ordinals_regex_ii = r'(IV|IV|III|II|IX|VIII|VII|VI|X|V|I)[^\w]'
 
 # basic regex
-soa_cat_regex_i = r'O(S|G)(\d\d?).*'
+soa_cat_regex_i = r'O(S|G)(\d\d?)'
 ordinals_regex_i = r'(IV|IV|III|II|IX|VIII|VII|VI|X|V|I)[^\w]'
 
-soa_cat_regex_version = soa_cat_regex_i
-ordinals_regex_version = ordinals_regex_i
+soa_cat_regex_version = soa_cat_regex_iii
+ordinals_regex_version = ordinals_regex_iii
 
 
 def message(a1, a2):
@@ -382,7 +382,22 @@ def matches_list_print(matches_string, matches_list):
         # print(strings_to_num(matches_string[begin_char:end_char]))
 
 
-def extract_soa_cat_class(mia_stringa, start_offset=0, end_offset=0):
+def func_classes(mia_stringa, start_offset_general, begin_char_next_match, cat_end_char, categories_list):
+    mia_stringa = re.sub(r'(BIS|Bis)', r'bis', mia_stringa)
+    class_pos_list = find_matches_positions(mia_stringa, ordinals_regex_version)
+    for classific in class_pos_list:
+        #substitutd = re.sub(ordinals_regex_version, r'\1',
+                            #mia_stringa[classific[0]:classific[1]])
+        output_cl = filtered_cl(mia_stringa[classific[0]:classific[1]])
+        if output_cl != '?':
+            categories_list.append([start_offset_general + cat_end_char + classific[0],
+                                    start_offset_general + cat_end_char + classific[1],
+                                   output_cl]
+                                   )
+    return
+
+
+def extract_soa_cat_class(mia_stringa, start_offset_general, end_offset_general):
     """
     Extraction of soa categories and classes
     """
@@ -391,27 +406,32 @@ def extract_soa_cat_class(mia_stringa, start_offset=0, end_offset=0):
     matches_list_print(mia_stringa, soa_pos_list)
     categories_list = []
     for i in range(len(soa_pos_list)):
-        begin_char = soa_pos_list[i][0]
-        end_char = soa_pos_list[i][1]
+        cat_begin_char = soa_pos_list[i][0]
+        cat_end_char = soa_pos_list[i][1]
         ## solvo bug  : begin_char_next_match = -1
-        begin_char_next_match = None
+        begin_char_next_match = end_offset_general - start_offset_general
         if i + 1 < len(soa_pos_list):
             begin_char_next_match = soa_pos_list[i + 1][0]
-        output_cat = filtered(normalised_category(mia_stringa[begin_char:end_char]))
+        output_cat = filtered(normalised_category(mia_stringa[cat_begin_char:cat_end_char]))
         if output_cat != 'Invalid':
-            print("processing", mia_stringa[begin_char:begin_char_next_match],
-                  "lenght: ", len(mia_stringa[begin_char:begin_char_next_match]))
-            string_classif, inizio_classif, fine_classif = classif(
-                mia_stringa[begin_char:begin_char_next_match])
-            output_cl = filtered_cl(string_classif)
-            print("added:", output_cat, output_cl)
-            categories_list.append([start_offset + begin_char, start_offset + end_char,
+            #print("processing", mia_stringa[cat_begin_char:begin_char_next_match],
+            #      "lenght: ", len(mia_stringa[cat_begin_char:begin_char_next_match]))
+            #string_classif, inizio_classif, fine_classif = \
+            #    classif(
+            #        mia_stringa[cat_end_char:begin_char_next_match]
+            #    )
+            #class_pos_list = find_matches_positions(mia_stringa[cat_end_char:begin_char_next_match], ordinals_regex_version)
+            #output_cl = filtered_cl(string_classif)
+            #print("added:", output_cat, output_cl)
+            categories_list.append([start_offset_general + cat_begin_char, start_offset_general + cat_end_char,
                                     # '-'.join([output_cat,output_cl])])
                                     output_cat])
-            if output_cl != '?':
-                categories_list.append([start_offset + begin_char,
-                                        start_offset + begin_char + fine_classif,
-                                        output_cl])
+            #if output_cl != '?':
+            #    pass
+                # categories_list.append([start_offset + end_char + inizio_classif,
+                # start_offset + end_char + fine_classif,
+                # output_cl])
+            func_classes(mia_stringa[cat_end_char:begin_char_next_match], start_offset_general, begin_char_next_match, cat_end_char, categories_list)
     return categories_list
 
 
@@ -434,7 +454,8 @@ def extract_soa_data(text_index, csv_print=False):
     col_recall = []
     # with suppress_stdout():
     testi = read_df('Dataset/soa.csv', 'testo')
-    document = testi[text_index]
+    document = testi[text_index].replace('\n','')
+    document = document.replace('\f','')
     # document = re.sub(r'\_',r' ', document)
     chosen_regex = from_os_n_char
     # from_os_to_period
@@ -449,8 +470,8 @@ def extract_soa_data(text_index, csv_print=False):
               % (delimiter, liste_di_matches.index(match), begin_char, end_char))
         print('- - -\n%s\n- - - \noutcome:' % (document[begin_char:end_char]))
         extracted = extract_soa_cat_class(document[begin_char:end_char],
-                                          start_offset=begin_char,
-                                          end_offset=end_char)
+                                          start_offset_general=begin_char,
+                                          end_offset_general=end_char)
         print(extracted)
         lista_di_soa.extend(extracted)
         print(Color.END)
@@ -526,14 +547,16 @@ def dumps_jsonl(text, retr, array_index):
     with suppress_stdout():
         empty_excluded = exclude_empty_sublist(retr)
     return json.dumps({"text": text, "meta": {"ord_id": array_index, "fr_id": 0},
-                       "labels": json_with_postprocessed_data(empty_excluded)})
+                       "labels": json_with_postprocessed_data(empty_excluded)},
+                       ensure_ascii=False)
 
 
 def dumps_labels_only(retr, array_index):
     with suppress_stdout():
         empty_excluded = exclude_empty_sublist(retr)
     return json.dumps({"meta": {"ord_id": array_index, "fr_id": 0},
-                       "labels": json_with_postprocessed_data(empty_excluded)})
+                       "labels": json_with_postprocessed_data(empty_excluded)},
+                      ensure_ascii=False)
 
 
 def dumps_data_frame(df):
@@ -547,10 +570,9 @@ def single_doc_dump():
     """
     Single-doc extraction
     """
-    notepad_index = 2
+    notepad_index = 10
     array_index = notepad_index - 1
-    with suppress_stdout():
-        df, text, windows, retr = extract_soa_data(array_index)
+    df, text, windows, retr = extract_soa_data(array_index)
     print(dumps_jsonl(text, retr, array_index))
 
 
@@ -558,7 +580,7 @@ def print_to_file(json_line):
     """
     This function writes data df to a file
     """
-    with open(jsonl_file, 'a') as f:
+    with open(jsonl_file, 'a', encoding= 'utf-8') as f:
         f.write(json_line)
         f.write('\n')
 
@@ -569,10 +591,11 @@ def interval_doc_dump():
     start_index = 0
     end_index = 100
     for indice in range(start_index, end_index):
-        with suppress_stdout():
-            df, text, windows, retr = extract_soa_data(indice)
+        #with suppress_stdout():
+        df, text, windows, retr = extract_soa_data(indice)
         # print(dumps_jsonl(text, retr, indice))
-        print_to_file(dumps_labels_only(retr, indice))
+        document = dumps_jsonl(text, retr, indice)
+        print_to_file(document)
         sleep(0.20)
 
 
@@ -587,16 +610,24 @@ def print_doc(her):
         testi = read_df('Dataset/soa.csv', 'testo')
     print(testi[her])
 
-
 # no pretty printing:  \n\r can show up in the string
 with suppress_stdout():
     testi = read_df('Dataset/soa.csv', 'testo')
 testi[0]
 
+def debug_stuff():
+    print("start main")
+    parole="classe OG1 OG2 cat I e III-Bis. "
+    print(len(parole))
+    listone = extract_soa_cat_class(parole, 0, len(parole))
+    print(listone)
 
 def main():
     # Calling the extraction and printing out the results.
+    #single_doc_dump()
+    #print_doc(0)
     interval_doc_dump()
+    #debug_stuff()
     return
 
 

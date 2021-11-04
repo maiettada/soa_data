@@ -1,9 +1,10 @@
 import spacy
 import json
+import sys
 from spacy.tokens import DocBin
 from dataset_division import period_level_section, sort_list
 from distribution_automaton import DistributionAutomaton
-from soa_data import soa_classifiche, soa_categorie
+from soa_data import soa_classifiche, soa_categorie_valide
 import random
 
 """
@@ -20,12 +21,25 @@ import random
 
 #input
 gold_json1_file = 'gold.json1'
-
+regex_json1_file = 'regex.json1'
 #output filepaths
-train_docbin = "./train.spacy"
-dev_docbin = "./dev.spacy"
-test_docbin = "./test.spacy"
+train_docbin = "./train"
+dev_docbin = "./dev"
+test_docbin = "./test"
 
+
+from contextlib import contextmanager
+import sys, os
+
+@contextmanager
+def suppress_stdout():
+    with open(os.devnull, "w") as devnull:
+        old_stdout = sys.stdout
+        sys.stdout = devnull
+        try:
+            yield
+        finally:
+            sys.stdout = old_stdout
 
 def read_json1_and_section_by_period(fp, sentences_labels_list, n_lines=-1):
     """
@@ -42,6 +56,7 @@ def read_json1_and_section_by_period(fp, sentences_labels_list, n_lines=-1):
         item = json.loads(line)
         txt_base = item['text']
         json_list_base = item['labels']
+        #print("LABELS size=",len(json_list_base), "    ")
         sort_list(json_list_base)
         found = 0
         if n_lines > 0:
@@ -93,7 +108,7 @@ def decide_for_single_label(decision, train_decided, test_decided, label=""):
 
 
 def add_to_decided_bin(doc, train, dev, test, train_decided, test_decided, train_documentation, dev_documentation,
-                       test_documentation, labels_list, appending_to_test_list):
+                       test_documentation, labels_list, appending_to_test_list, command, i,num_insertions):
     """
     The procedure assigns a doc to the proper train/dev/test DocBin; since train/dev/test doc-bins need a 70% - 10 % - 20% of the label instances,
     for every label an automaton object decided "train" or "test" ( or other, i.e. dev).
@@ -116,10 +131,15 @@ def add_to_decided_bin(doc, train, dev, test, train_decided, test_decided, train
     """
     if train_decided:
         # 70% to the training set
-        train.add(doc)
-        if appending_to_test_list:
+        if i>-1 and (num_insertions > 100*i) and (command == "up-to"):
+            pass
+        elif i>-1 and (num_insertions < 100*i) and (command == "after"):
+            num_insertions = num_insertions + len(labels_list)
+        else:
+            train.add(doc)
             train_documentation.append(labels_list)
-        print("train bin will get labels: ", labels_list)
+            num_insertions = num_insertions + len(labels_list)
+            print("train bin will get labels: ", labels_list)
     elif test_decided:
         # 20% to the test set
         test.add(doc)
@@ -132,7 +152,7 @@ def add_to_decided_bin(doc, train, dev, test, train_decided, test_decided, train
         if appending_to_test_list:
             dev_documentation.append(labels_list)
         print("dev bin will get labels: ", labels_list)
-    return
+    return num_insertions
 
 
 def make_unique_list(labels_list):
@@ -169,7 +189,8 @@ def randomly_decide():
     return train_decided, test_decided
 
 
-def decide_where_to_put(txt, labels_list, train_documentation, dev_documentation, test_documentation):
+def decide_where_to_put(txt, labels_list, train_documentation, dev_documentation, test_documentation, command, i,
+                        num_insertions):
     """
     This function does two things:
     1. assigns doc.ents=span(label) for each label of the list, also taking care of the exceptions that could rise;
@@ -185,15 +206,11 @@ def decide_where_to_put(txt, labels_list, train_documentation, dev_documentation
     unsafe_entities_local = []
     unsafe_entities_local_debug = []
     doc = nlp.make_doc(txt)
-    train_decided = False
-    test_decided = False
-    labels_present = False
     if not labels_list:
-        empty_label = ""
-        labels_list= [[None, None, empty_label]]
+        labels_list= []
         # recovered the lack of label by faking a "" label ( even docs without labels must be distributed to bins)
     else:
-        labels_present = True
+        labels_list = [label_element for label_element in labels_list if label_element[2] in soa_values_list]
         print('\n', "(json_list)", '\n', labels_list)
         # decide for empty json_list
         for label_element in labels_list:
@@ -203,6 +220,7 @@ def decide_where_to_put(txt, labels_list, train_documentation, dev_documentation
                                  alignment_mode="contract")
             unsafe_entities_local.append(span)
             unsafe_entities_local_debug.append(label_element)
+            print("trying with:",  txt[label_element[0]:label_element[1]])
             try:
                 # here the error can arise
                 doc.ents = unsafe_entities_local
@@ -212,17 +230,19 @@ def decide_where_to_put(txt, labels_list, train_documentation, dev_documentation
                 unsafe_entities_local_debug.pop()
                 doc.ents = unsafe_entities_local
                 print("exception- forgetting problematic label")
-    if random_strategy:
-        train_decided, test_decided = randomly_decide()
-    else:
-        train_decided, test_decided = automata_decide_listwise(labels_list)
-    print("ok - stored into safe")
-    add_to_decided_bin(doc, train, dev, test, train_decided, test_decided, train_documentation, dev_documentation,
-                       test_documentation, unsafe_entities_local_debug, labels_present)
-    return
+        #excluding the (too many!) irrelevant instances (no-labels docs)
+        if random_strategy:
+            train_decided, test_decided = randomly_decide()
+        else:
+            train_decided, test_decided = automata_decide_listwise(labels_list)
+        print("ok - stored into safe:")
+        num_insertions = add_to_decided_bin(doc, train, dev, test, train_decided, test_decided, train_documentation, dev_documentation,
+                           test_documentation, unsafe_entities_local_debug, True, command, i,num_insertions)
+    return num_insertions
 
 
-def process_json1(ground_truth, obj_list, train, dev, test, train_documentation, test_documentation, dev_documentation):
+def process_json1(ground_truth, obj_list, train, dev, test, train_documentation, test_documentation, dev_documentation,
+                  command="up-to", i=-1):
     """
     The procedure reads a json1 file, then calls the read_json1_and_sect_by_period.
     Finally, it distributes each sentence and related labels to the proper bin.
@@ -237,13 +257,19 @@ def process_json1(ground_truth, obj_list, train, dev, test, train_documentation,
     :param dev_documentation: (for debugging purposes) will contain labels-lists that are added into dev docbin;
     :return:
     """
+    num_insertions=0
     with open(ground_truth, 'r') as fp:
         sentences_labels_list = []
         read_json1_and_section_by_period(fp, sentences_labels_list, -1)  # -1: everything must be cut into sentences
         # now sentences_labels_list has the pairs (txt, json_list)
         for txt, json_list in sentences_labels_list:
-            decide_where_to_put(txt, json_list, train_documentation, dev_documentation, test_documentation)
+            with suppress_stdout():
+                num_insertions = decide_where_to_put(txt, json_list, train_documentation, dev_documentation, test_documentation,
+                                    command, i, num_insertions)
+                if i > -1 and (num_insertions > 100 * i) and (command == "up-to"):
+                    break
     return
+
 
 random_strategy = True
 nlp = spacy.blank("it")
@@ -253,9 +279,9 @@ test = DocBin()
 train_documentation = []
 test_documentation = []
 dev_documentation = []
+soa_values_list = soa_categorie_valide + soa_classifiche
 
-
-def main():
+def main_not_delta():
     """
         train, dev, test: docbins where this script is going to put the docs.
         train_documentation, test_documentation, dev_documentation: lists where I put the labels, so I can check their
@@ -264,7 +290,6 @@ def main():
 
         Final output: *.spacy files to be used in the spacy training
     """
-    soa_values_list = soa_categorie + soa_classifiche
     # creating objects of the class distributionAutomaton
     obj_list = []
     if not random_strategy:
@@ -278,9 +303,24 @@ def main():
         print("#completed distr in the automata documents: ",len([x.how_many_distributions() for x in obj_list
                                                                   if x.how_many_distributions() >= 1]))
         print([(x.get_label(), x.how_many_distributions()) for x in obj_list])
-    train.to_disk(train_docbin)
-    dev.to_disk(dev_docbin)
-    test.to_disk(test_docbin)
+    train.to_disk(train_docbin+".spacy")
+    dev.to_disk(dev_docbin+".spacy")
+    test.to_disk(test_docbin+".spacy")
+
+
+def main_delta(i):
+    # creating objects of the class distributionAutomaton
+    obj_list = []
+    process_json1(gold_json1_file, obj_list, train, dev, test,
+                  train_documentation, test_documentation, dev_documentation, "up-to", i)
+    process_json1(regex_json1_file, obj_list, train, dev, test,
+                  train_documentation, test_documentation, dev_documentation, "after", i)
+    train.to_disk(train_docbin+str(i)+".spacy")
+    dev.to_disk(dev_docbin + ".spacy")
+    test.to_disk(test_docbin + ".spacy" )
 
 if __name__ == "__main__":
-    main()
+    #main_not_delta()
+    #main_delta(int(sys.argv[1]))
+    for i in range(1,10):
+        main_delta(i)
