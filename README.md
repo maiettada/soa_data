@@ -16,7 +16,11 @@ It's a necessary step for the setup of a NER task in spacy;
 
 documented_outputs: results of the modules with the real data.
 
-
+**Commands.txt**:
+ 
+Contains the two usages:
+1. Regex VS Spacy evaluation: usage and evaluation of regex and spaCy NER
+2. Human In the Loop evaluation: runs a HITL framework, by combining regex-system annotations and human gold-annotations in an iterative way.
 
 [![flow chart](https://github.com/maiettada/soa_data_extraction/blob/main/flow_chart.pdf)]
 

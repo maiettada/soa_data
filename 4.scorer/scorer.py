@@ -67,7 +67,7 @@ def format_json_line_data_labelled(labelled_obj):
 
 
 def init_nlp():
-    nlp = spacy.blank("en")
+    nlp = spacy.blank("it")
     nlp.add_pipe("ner")
     nlp.begin_training()
     return nlp

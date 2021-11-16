@@ -133,8 +133,8 @@ def add_to_decided_bin(doc, train, dev, test, train_decided, test_decided, train
         # 70% to the training set
         if i>-1 and (num_insertions > 100*i) and (command == "up-to"):
             pass
-        elif i>-1 and (num_insertions < 100*i) and (command == "after"):
-            num_insertions = num_insertions + len(labels_list)
+        #elif i>-1 and (num_insertions < 100*i) and (command == "after"):
+        #    num_insertions = num_insertions + len(labels_list)
         else:
             train.add(doc)
             train_documentation.append(labels_list)
@@ -257,17 +257,20 @@ def process_json1(ground_truth, obj_list, train, dev, test, train_documentation,
     :param dev_documentation: (for debugging purposes) will contain labels-lists that are added into dev docbin;
     :return:
     """
-    num_insertions=0
-    with open(ground_truth, 'r') as fp:
-        sentences_labels_list = []
-        read_json1_and_section_by_period(fp, sentences_labels_list, -1)  # -1: everything must be cut into sentences
-        # now sentences_labels_list has the pairs (txt, json_list)
-        for txt, json_list in sentences_labels_list:
-            with suppress_stdout():
-                num_insertions = decide_where_to_put(txt, json_list, train_documentation, dev_documentation, test_documentation,
-                                    command, i, num_insertions)
-                if i > -1 and (num_insertions > 100 * i) and (command == "up-to"):
-                    break
+    num_insertions = 0
+    if i == 0 and (command == "up-to"):
+        pass
+    else:
+        with open(ground_truth, 'r') as fp:
+            sentences_labels_list = []
+            read_json1_and_section_by_period(fp, sentences_labels_list, -1)  # -1: everything must be cut into sentences
+            # now sentences_labels_list has the pairs (txt, json_list)
+            for txt, json_list in sentences_labels_list:
+                with suppress_stdout():
+                    num_insertions = decide_where_to_put(txt, json_list, train_documentation, dev_documentation, test_documentation,
+                                        command, i, num_insertions)
+                    if i > -1 and (num_insertions > 100 * i) and (command == "up-to"):
+                        break
     return
 
 
@@ -319,8 +322,15 @@ def main_delta(i):
     dev.to_disk(dev_docbin + ".spacy")
     test.to_disk(test_docbin + ".spacy" )
 
+
 if __name__ == "__main__":
-    #main_not_delta()
-    #main_delta(int(sys.argv[1]))
-    for i in range(1,10):
-        main_delta(i)
+    obj_list = []
+    if len(sys.argv)==3 and sys.argv[1] == "--loop-additions" :
+        for i in range(0,int(sys.argv[2])+1):
+            main_delta(i)
+    else:
+        process_json1(gold_json1_file, obj_list, train, dev, test,
+                      train_documentation, test_documentation, dev_documentation, "up-to", -1) #cambiare process-json1
+        train.to_disk(train_docbin+".spacy")
+        dev.to_disk(dev_docbin + ".spacy")
+        test.to_disk(test_docbin + ".spacy" )

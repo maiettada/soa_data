@@ -454,9 +454,8 @@ def extract_soa_data(text_index, csv_print=False):
     col_recall = []
     # with suppress_stdout():
     testi = read_df('Dataset/soa.csv', 'testo')
-    document = testi[text_index].replace('\n','')
-    document = document.replace('\f','')
-    # document = re.sub(r'\_',r' ', document)
+    document = testi[text_index] #.replace('\n','')
+    #document = document.replace('\f','')
     chosen_regex = from_os_n_char
     # from_os_to_period
     liste_di_matches = find_matches_positions(document, chosen_regex)

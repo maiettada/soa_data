@@ -1,0 +1,28 @@
+Regex VS Spacy evaluation command
+
+
+./removals.sh
+cd 1.ner_regex/ && ./init.sh ; python3 regex_information_extraction.py > log && \
+cd ../2.dataset_splitter/ && ./retrieve-gold.sh && python3 dataset_splitter.py > log  && \
+cd ../3.ner_spacy/ && ./init.sh ; ./retrieve-inputs.sh && ./train.sh  && ./debug.sh  ; ./evaluate.sh ; python3 usage.py && \
+cd ../4.scorer/ && ./retrieve-inputs.sh  && python3 scorer.py  && \
+cd ../5.json_to_csv/ && ./retrieve-inputs.sh &&  python3 json_to_csv.py && \
+cp spacy.csv ../../ && cp regex.csv ../../
+
+
+Human In the Loop evaluation command
+
+./removals.sh
+cd 1.ner_regex/ && ./init.sh ; python3 regex_information_extraction.py > log && \
+cd ../2.dataset_splitter/ && ./retrieve-mixed.sh && python3 dataset_splitter.py --loop-additions 10 > log && \
+for i in {0..10}; do cd .. && \
+remove-iteration-files.sh; \
+cd 3.ner_spacy/ && ./init.sh ; ./retrieve-inputs.sh && \
+spacy init fill-config base_config.cfg config.cfg && \
+echo "spacy train config.cfg --paths.train ./train$i.spacy " && \
+spacy train config.cfg --paths.train ./train$i.spacy --paths.dev ./dev.spacy --output ./output && \
+python3 usage.py && \
+cd ../4.scorer/ && ./retrieve-inputs.sh  && python3 scorer.py  && \
+cd ../5.json_to_csv/ && ./retrieve-inputs.sh &&  python3 json_to_csv.py && \
+cp spacy.csv ../../outcomes$i.csv; done
+
