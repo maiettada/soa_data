@@ -133,8 +133,8 @@ def add_to_decided_bin(doc, train, dev, test, train_decided, test_decided, train
         # 70% to the training set
         if i>-1 and (num_insertions > 100*i) and (command == "up-to"):
             pass
-        #elif i>-1 and (num_insertions < 100*i) and (command == "after"):
-        #    num_insertions = num_insertions + len(labels_list)
+        elif i>-1 and (num_insertions < 100*i) and (command == "after"):
+            num_insertions = num_insertions + len(labels_list)
         else:
             train.add(doc)
             train_documentation.append(labels_list)
