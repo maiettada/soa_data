@@ -94,14 +94,14 @@ ordinals_regex_iii = r'(IV\s?\-?bis|IV|III\s?\-?bis|III|II|IX|VIII|VII|VI|X|V|I)
 
 # medium-complexity regex
 soa_cat_regex_ii = r'O(S|G|s|g)(\d\d?\w?)'
-ordinals_regex_ii = r'(IV|IV|III|II|IX|VIII|VII|VI|X|V|I)[^\w]'
+ordinals_regex_ii = r'(IV|IV|III|II|IX|VIII|VII|VI|X|V|I)'
 
 # basic regex
 soa_cat_regex_i = r'O(S|G)(\d\d?)'
-ordinals_regex_i = r'(IV|IV|III|II|IX|VIII|VII|VI|X|V|I)[^\w]'
+ordinals_regex_i = r'(IV|IV|III|II|IX|VIII|VII|VI|X|V|I)'
 
-soa_cat_regex_version = soa_cat_regex_iii
-ordinals_regex_version = ordinals_regex_iii
+soa_cat_regex_version = soa_cat_regex_i
+ordinals_regex_version = ordinals_regex_i
 
 
 def message(a1, a2):
