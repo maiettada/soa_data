@@ -16,7 +16,7 @@ Human In the Loop evaluation command
 cd 1.ner_regex/ && ./init.sh ; python3 regex_information_extraction.py > log && \
 cd ../2.dataset_splitter/ && ./retrieve-mixed.sh && python3 dataset_splitter.py --loop-additions 10 > log && \
 for i in {0..10}; do cd .. && \
-remove-iteration-files.sh; \
+./remove-iteration-files.sh; \
 cd 3.ner_spacy/ && ./init.sh ; ./retrieve-inputs.sh && \
 spacy init fill-config base_config.cfg config.cfg && \
 echo "spacy train config.cfg --paths.train ./train$i.spacy " && \

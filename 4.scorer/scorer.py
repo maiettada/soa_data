@@ -124,7 +124,7 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory
     :return: label_subcategory list, the list of labels to be considered in the evaluation
     (so allowing independent evaluations on different labels lists )
     """
-
+    num_labels=0
     scorer = Scorer(ner_model)
     list = []
     for [gold_textunit, gold_annots, gold_ord_id] in gold_annotations:
@@ -138,6 +138,7 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory
             else:
                 label_list_i = []
         label_list_i = [[s_o, e_o, label] for [s_o, e_o, label] in label_list_i if label in label_subcategory]
+        num_labels = num_labels + len(label_list_i)
         gold_annots = [[s_o, e_o, label] for [s_o, e_o, label] in gold_annots if label in label_subcategory]
         labelled_ner_textunit = ner_model.make_doc(gold_textunit)
         label_list_i_selection = selection_list(label_list_i, gold_annots, label_subcategory)
@@ -157,6 +158,7 @@ def evaluate(ner_model, gold_annotations, labelled_data_lines, label_subcategory
                                                                       in gold_annots]})
         list.append(item)
     scores = scorer.score(list)
+    print("numlabels", num_labels)
     return scores
 
 
@@ -239,9 +241,9 @@ def compute_score(labelled_json1_filename, output_filename):
     core part of the script: the evaluation, that is called twice:
      once for soa-categories, once for soa-classifications; result is sent in output to file
     """
-    for label_subcategory in evaluation_subcategory_lists:
-        results[evaluation_subcategory_lists.index(label_subcategory)] = evaluate(ner_model, loaded_gold_data,
-                                                                                  loaded_labelled_data, label_subcategory)
+    #for label_subcategory in evaluation_subcategory_lists:
+    #    results[evaluation_subcategory_lists.index(label_subcategory)] = evaluate(ner_model, loaded_gold_data,
+    #                                                                              loaded_labelled_data, label_subcategory)
     results_cat = evaluate(ner_model, loaded_gold_data, loaded_labelled_data, soa_categorie)
     results_class = evaluate(ner_model, loaded_gold_data, loaded_labelled_data, soa_classifiche)
     results_unified = unify_json_element(results_cat, results_class, 'ents_per_type')
